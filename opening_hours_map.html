@@ -1,0 +1,574 @@
+<html xml:lang="de"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:cal="http://www.w3.org/2002/12/cal/ical#"
+	xmlns:cc="http://creativecommons.org/ns#"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+>
+<head profile="http://dublincore.org/documents/dcq-html/">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Target" content="_top" />
+<meta http-equiv="Last-Modified" content="Thu, 04 Apr 2013 21:05:14 GMT" />
+<title>POIs per JSONP laden · angezeigt auf Karte von OpenStreetMap</title>
+<meta name="description" content="Nutzung von OpenLayers: die Klasse OpenLayers.Layer.PopupMarker erlaubt das Laden von Punktfeatures vermittels JSONP direkt vom Overpass-Server." />
+<link rel="stylesheet" type="text/css" href="/s/css/default.css" media="screen,projection,print" title="Netzwolf default" />
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+<link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" />
+<meta name="DC.subject" scheme="DCTERMS.DDC" content="526" />
+<meta name="DCTERMS.modified" scheme="DCTERMS.W3CDTF" content="2010-08-16" />
+<link rel="meta" href="/x/icra.rdf" type="application/rdf+xml" title="ICRA labels" />
+<link rel="copyright" title="Urheberrecht" href="/_meta/anbieterkennzeichnung#copyright" />
+<link href="http://www.netzwolf.info/kartografie/openlayers/overpass_pois2"
+	rel="alternate"
+	title="@www.netzwolf.info" />
+<link rel="search" href="/_katalog/suche" />
+<link rel="help" href="/_meta/hilfe_zur_nutzung" />
+<script type="text/javascript">
+/*<![CDATA[*/
+var map;
+
+if (!document.onLoadFunctions) {
+	document.onLoadFunctions = new Array();
+	window.onload = function () { for (var i=0; document.onLoadFunctions.length>i;i++) document.onLoadFunctions[i](); }
+}
+
+var poi_layer;
+
+var permalinkParams={};
+var permalinkObject;
+
+document.onLoadFunctions.push ( function () {
+
+	//----------------------------------------------------------------------------
+	//	Karte - der Name ('map') muss mit der id des <div> uebereinstimmen.
+	//----------------------------------------------------------------------------
+
+	map = new OpenLayers.Map ('map', {controls:[]});
+
+	//----------------------------------------------------------------------------
+	//	Default-Koordinatensystem fuer alle Controls
+	//----------------------------------------------------------------------------
+
+	map.displayProjection = new OpenLayers.Projection ('EPSG:4326');
+
+	//----------------------------------------------------------------------------
+	//	Patch
+	//----------------------------------------------------------------------------
+
+	OpenLayers.Control.Permalink.prototype.updateLink = function() {
+
+		permalinkObject = this;
+		var href=this.base;
+		if(href.indexOf('?')!=-1){
+			href=href.substring(0,href.indexOf('?'));
+		}
+		href+='?'+OpenLayers.Util.getParameterString(OpenLayers.Util.extend(this.createParams(), permalinkParams));
+		this.element.href=href;
+	};
+
+	//----------------------------------------------------------------------------
+	//	Steuerelemente
+	//----------------------------------------------------------------------------
+
+	map.addControl (new OpenLayers.Control.LayerSwitcher());
+	map.addControl (new OpenLayers.Control.LoadStatus(			//#######
+		{html: '<img src="/j/ajax-loader.gif" /><br />${layers}'}	//#######
+	));									//#######
+	map.addControl (new OpenLayers.Control.MousePosition());
+	map.addControl (new OpenLayers.Control.Navigation());
+	map.addControl (new OpenLayers.Control.PanZoomBar());
+	map.addControl (new OpenLayers.Control.Permalink());
+
+	//----------------------------------------------------------------------------
+	//	Tooltipschalter
+	//----------------------------------------------------------------------------
+
+	map.addControl (new OpenLayers.Control ({
+
+		id: 'tooltipSwitch',
+
+		draw:function(){
+
+			OpenLayers.Control.prototype.draw.apply(this,arguments);
+			if(!this.element){
+
+				this.element=document.createElement('button');
+				this.element.innerHTML='Namen ein/aus';
+				this.element.onclick = function () {
+					var body=document.getElementsByTagName('body')[0];
+					body.className = body.className ? '' : 'on';
+				}
+				this.element.control=this;
+				this.div.appendChild(this.element);
+			}
+			return this.div;
+		}
+	}));
+
+	//----------------------------------------------------------------------------
+	//	Kartenlayer
+	//----------------------------------------------------------------------------
+
+	map.addLayer (new OpenLayers.Layer.OSM.Mapnik('Mapnik'));
+	map.addLayer (new OpenLayers.Layer.OSM.CycleMap('CycleMap'));
+
+	//----------------------------------------------------------------------------
+	//**	JSONP-POI-Layer
+	//----------------------------------------------------------------------------
+
+	map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('Orte von Interesse', {
+
+		//------------------------------------------------------------
+		//	blocksize=0 deaktiviert das Cachen von Markern.
+		//------------------------------------------------------------
+
+		blockSize: 0,
+
+		//------------------------------------------------------------
+		//	Marker in allen Zoomstufen darstellen
+		//------------------------------------------------------------
+
+		minZoom: 0,
+
+		//------------------------------------------------------------
+		//	JOSM&Co Links anzeigen
+		//------------------------------------------------------------
+
+		osmlinks: true,
+
+		//------------------------------------------------------------
+		//	Icons
+		//------------------------------------------------------------
+
+		createIconFromData: function (data) {
+
+			if (data.emergency) {
+				return new OpenLayers.Icon ('/i/ol/nadel_rot_26x30.png', {w:26,h:30}, {x:0,y:-30});
+			}
+
+			switch (data.amenity) {
+			case 'fire_hydrant':
+				return new OpenLayers.Icon ('/i/ol/nadel_gelb_24x25.png', {w:24,h:25}, {x:0,y:-25});
+			}
+
+			return new OpenLayers.Icon (this.getIconUrl(data), {w:16,h:16});
+		},
+
+		getIconUrl: function (data) {
+
+			if (data.emergency) {
+				return '/i/ol/nadel_rot_26x30.png';
+			}
+
+			switch (data.amenity) {
+			case 'restaurant':
+				return '/i/osm/restaurant.png';
+			case 'fast_food':
+				return '/i/osm/fastfood.png';
+			case 'cafe':
+				return '/i/osm/cafe.png';
+			case 'pub':
+				return '/i/osm/pub.png';
+			case 'school':
+				return '/i/osm/school.png';
+			case 'kindergarten':
+				return '/i/osm/kindergarten.png';
+			case 'fire_hydrant':
+				return '/i/ol/nadel_gelb_24x25.png';
+			}
+
+			switch (data.highway) {
+			case 'bus_stop':
+				return '/i/osm/bus_halt.png';
+			}
+
+			switch (data.shop) {
+			case 'bakery':
+				return '/i/osm/baker.png';
+			case 'supermarket':
+			case 'convenience':
+				return '/i/osm/shopping.png';
+			}
+
+			if (data.man_made) {
+				return '/i/ol/circle_black.png';
+			}
+
+			switch (data.historic) {
+			case 'memorial':
+				return '/i/osm/board.png';
+			}
+
+			switch (data.vending) {
+			case 'excrement_bags':
+				return '/i/osm/dogbag.png';
+			}
+
+			return '/i/ol/circle_red.png';
+		},
+
+		//------------------------------------------------------------
+		//	Welche POIs laden?
+		//------------------------------------------------------------
+
+		keyValues: [
+		],
+
+		//------------------------------------------------------------
+		//	Nach pan oder zoom: POIs neuladen.
+		//------------------------------------------------------------
+
+		moveTo: function (bounds, zoomChanged, dragging) {
+
+			OpenLayers.Layer.Markers.prototype.moveTo.apply(this,arguments);
+
+			if (dragging || !this.visibility || this.map.zoom<this.minZoom) return;
+
+			this.reloadPOIs();
+		},
+
+		//------------------------------------------------------------
+		//	POIs neuladen.
+		//	Muss nach Ändern von keyValues augerufen werden.
+		//------------------------------------------------------------
+
+		reloadPOIs: function () {
+
+			if (this.updateKeyValues) this.updateKeyValues();
+
+			var xml = this.overpassXML (this.keyValues);
+			var url = 'http://overpass-api.de/api/interpreter?jsonp=#&data=' + encodeURIComponent(xml);
+			this.jsonpRequest (url, this, this.jsonCallback);
+		},
+
+		//------------------------------------------------------------
+		//	Parse keyvalues from text
+		//------------------------------------------------------------
+
+		parseKeyValues: function (text) {
+
+			var keyvals = [];
+			var taglist = [];
+
+			//------------------------------------------------------------
+			//	Splitte den textarea-Inhalt in Zeilen.
+			//------------------------------------------------------------
+
+			var lines = text.split('\n');
+			for (var i in lines) {
+
+				//----------------------------------------------------
+				//	Splitte die Zeile in tag und value.
+				//----------------------------------------------------
+
+				var fields = lines[i].split ('=');
+
+				var key  = OpenLayers.String.trim (fields[0] || '');
+				if (!key) continue;
+
+				//----------------------------------------------------
+				//	Neues Objekt mit key
+				//----------------------------------------------------
+
+				var keyval = { 'key': key };
+
+				//----------------------------------------------------
+				//	Wenn value, dann auch value (sonst key=*)
+				//----------------------------------------------------
+
+				var value= OpenLayers.String.trim (fields[1] || '');
+				if (value) keyval.value = value;
+
+				//----------------------------------------------------
+				//	In Liste aufnehmen
+				//----------------------------------------------------
+
+				keyvals.push (keyval);
+				taglist.push (key + (value ? '=' + value : ''));
+			}
+
+			//------------------------------------------------------------
+			//	Trage die Keyval-Liste im Layer ein.
+			//------------------------------------------------------------
+
+			permalinkParams.tags = taglist.join(',');
+			this.keyValues = keyvals;
+		},
+
+		//------------------------------------------------------------
+		//	Baue aus der keyValues eine overpass-Anfrage.
+		//------------------------------------------------------------
+
+		overpassXML: function (keyvalues) {
+
+			if (!(keyvalues instanceof Array)) keyvalues = [keyvalues];
+
+			var bbox = this.map.getExtent().
+				transform(this.map.getProjectionObject(),this.map.displayProjection);
+
+			var bboxQuery = OpenLayers.String.format (
+				'<bbox-query s="${bottom}" n="${top}" w="${left}" e="${right}"/>',
+				bbox);
+
+			var components = [];
+			for (var i in keyvalues) {
+				var keyvalue = keyvalues[i];
+				var key = keyvalue.key;
+				if (!key) continue;
+				var value = keyvalue.value;
+				var kvlist = [];
+				kvlist.push ("<has-kv");
+				if (key) kvlist.push ('k="' + this.html(key) + '"');
+				if (value) kvlist.push ('v="' + this.html(value) + '"');
+				kvlist.push ("/>");
+				components.push ('<query type="node">' + bboxQuery + kvlist.join(' ') + '</query>');
+			}
+
+			var xml = '<osm-script output="json"><union>' + components.join('') + '</union><print/></osm-script>';
+
+			return xml;
+		},
+
+		//------------------------------------------------------------
+		//	Callback-Funktion für JSONP:
+		//	Löscht die bestehenden POIs und trägt die neuen ein.
+		//------------------------------------------------------------
+
+		jsonCallback: function (data) {
+
+			var elements = data.elements;
+			if (!elements) {
+				alert ('Missing "elements" in overpassXML json data.');
+				return;
+			}
+			this.erase (true);
+			for (var i in elements) {
+				var element = elements[i];
+				var data = element.tags;
+				if (!data) data = {};
+				if (element.id) data.id = (element.type ? element.type.substr(0,1) : '') + element.id;
+				if (element.type) data._type = element.type;
+				data.lat = element.lat;
+				data.lon = element.lon;
+				this.createMarker (data);
+			}
+		},
+
+		//------------------------------------------------------------
+		//	Update keyValues
+		//------------------------------------------------------------
+
+		updateKeyValues: function () {
+
+			this.parseKeyValues (document.getElementById('tagselector_input').value);
+		},
+
+		//------------------------------------------------------------
+		//	Bestimme den Tooltip-Html-Text zu einem Datensatz (optional).
+		//------------------------------------------------------------
+
+		createTooltipFromData: function (data) {
+			return this.html(data.name || data.ref || '#' + data.id);
+		}
+	} ));
+
+	//----------------------------------------------------------------------------
+	//	Klick auf Button bei "POIs konfigurieren"
+	//----------------------------------------------------------------------------
+
+	document.getElementById('tagselector_button').onclick = function () {
+		poi_layer.reloadPOIs();
+		permalinkObject.updateLink();
+	};
+
+	//----------------------------------------------------------------------------
+	//	Stelle bestimmten Bereich in maximaler Groesse dar
+	//----------------------------------------------------------------------------
+
+	if (!map.getCenter()) {
+		map.zoomToExtent(
+			new OpenLayers.Bounds(7.1042, 50.7362, 7.1171, 50.7417).
+		transform(new OpenLayers.Projection('EPSG:4326'), map.getProjectionObject()));
+	}
+});
+/*]]>*/</script>
+<script type="text/javascript" src="js/OpenLayers.js"></script>
+<script type="text/javascript" src="js/OpenStreetMap.js"></script>
+<script type="text/javascript" src="js/popupmarker.js"></script>
+<script type="text/javascript" src="js/loadstatus.js"></script>
+<style type="text/css">
+.olMap {
+	color: black;
+}
+
+.olMap a {
+	background: transparent;
+	color: blue;
+	text-decoration: none;
+}
+
+.olControlAttribution {
+	bottom: 0.1em !important;
+	left: 0.1em;
+	background: transparent;
+}
+
+.olControlLoadStatus {
+	left: 50px;
+	top: 10px;
+	color: blue;
+	opacity: 0.8;
+}
+
+.olControlMousePosition {
+	bottom: 0.1em;
+	right: 0.1em;
+	font-family: monospace;
+	background: white;
+	opacity: 0.7;
+}
+
+.olControlPermalink {
+	bottom: 1.5em;
+	right: 0.1em;
+}
+
+div.olPopupMarker div.tooltip {
+	display: none;
+	background: white;
+	border: 1px solid gray;
+	padding: 2px;
+	left: -10px;
+	top: 40px;
+	z-index: 10000;
+}
+
+body.on div.olPopupMarker div.tooltip,
+div.olPopupMarker:hover div.tooltip {
+	display: block;
+}
+
+#tooltipSwitch {
+	display: absolute;
+	left: 0.1em;
+	bottom: 1.5em;
+	cursor: move;
+	background: white;
+}
+
+#tooltipSwitch:hover {
+	background: yellow;
+}
+
+#tooltipSwitch button {
+	border: 3px outset gray;
+}
+
+#tagselector {
+	position: absolute;
+	z-index: 10000;
+	right: 70px;
+	top: 5px;
+	padding: 1ex;
+	border: 1px solid gray;
+	background: #cccccc;
+}
+
+#tagselector div {
+	display: none;
+}
+
+#tagselector:hover div {
+	display: block;
+}
+
+.olControlSelectFeature {
+	background: #e0e0e0;
+	border: 1px solid gray;
+	padding: 0.5ex;
+	display: none;
+}
+
+#map {
+	width: 100%;
+	height: 100%;
+	background: gray;
+}
+
+</style>
+</head>
+
+<body>
+<div id="map"></div>
+<div id="tagselector">
+<b>POIs konfigurieren</b>
+<div>
+<textarea id="tagselector_input" cols="24" rows="20">
+amenity=restaurant
+amenity=fast_food
+amenity=cafe
+amenity=pub
+amenity=school
+amenity=kindergarte
+highway=bus_stop
+shop=bakery
+shop=convenience
+shop=supermarket</textarea><br/>
+<button id="tagselector_button">Karte aktualisieren</button>
+</div>
+</div>
+<div id="Xc">
+<h1 class="Xs">POIs per JSONP laden</h1>
+
+<div class="Xa">
+Springe zu:
+<a href="#Xnp" accesskey="S">Seitenhierarchie</a>.
+</div>
+<p>
+Zum Selbermachen:
+<a href="overpass_pois2.htm">HTML-Code mit Erklärung</a>.
+</p>
+
+<p>
+Diese Seite gibt es auch <a href="overpass_pois">ohne konfigurierbarer Tag-Liste</a>.
+</p><div id="Xm">
+<hr />
+©&#160;2010-2013 – zuletzt geändert am 16.08.2010
+</div>
+</div>
+
+<div id="Xd">
+Verbraucherinformation: enthält
+<a href="http://validator.w3.org/check?verbose=1&amp;outline=1&amp;uri=http%3A%2F%2Fwww.netzwolf.info%2Fkartografie%2Fopenlayers%2Foverpass_pois2" rel="nofollow">HTML4.0</a>,
+<a href="http://jigsaw.w3.org/css-validator/validator?uri=http%3A%2F%2Fwww.netzwolf.info%2Fkartografie%2Fopenlayers%2Foverpass_pois2&amp;warning=no" rel="nofollow">CSS</a>
+und eine <a href="/_meta/anbieterkennzeichnung"
+	lang="de"
+	rel="nofollow">Anbieterkennzeichnung</a>.
+<br />
+</div>
+
+<div class="Xn">
+
+<hr />
+<h2>Navigation</h2>
+
+<div id="Xntpls">
+<div id="Xnpls">
+
+<div id="Xnp"><h3>Seitenhierarchie</h3>
+<ul>
+<li class="X1"><a href="/"
+	rel="start">Netzwolf</a></li>
+<li><a href="/kartografie/">Kartografie</a></li>
+<li><a href="/kartografie/openlayers/">OpenLayers</a></li>
+<li><span class="Xs">POIs per JSONP</span></li>
+</ul>
+</div>
+
+<div id="Xnls">
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

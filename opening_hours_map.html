@@ -8,6 +8,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Auswertung des Tags opening_hours auf einer Karte von OpenStreetMap</title>
 <meta name="description" content="Auswertung des Tags opening_hours auf einer Karte von OpenStreetMap" />
+<link rel="stylesheet" href="opening_hours.js/css/table.css"/>
 <script type="text/javascript">
 /*<![CDATA[*/
 var map;
@@ -21,6 +22,37 @@ var poi_layer;
 
 var permalinkParams={};
 var permalinkObject;
+
+function evaluateOH(data) {
+	if (data.opening_hours && typeof data._oh_state == 'undefined') {
+		data._oh_value = data.opening_hours; // The opening_hours syntax is used for other tags as well.
+		var crashed = true;
+		try {
+			var oh = new opening_hours(data._oh_value);
+			var it = oh.getIterator(this.reftime);
+			crashed = false;
+		} catch (err) {
+			crashed = err;
+			data._oh_object = crashed;
+			data._oh_state = 'error';
+		}
+
+		if (!crashed) {
+			data._oh_object = oh;
+			data._it_object = it;
+			if (oh.getWarnings().length > 0) {
+				data._oh_state = 'warning';
+			} else {
+				data._oh_state = 'ok';
+			}
+		}
+		return data._oh_state;
+	}
+}
+
+function Evaluate(number, reset, value) {
+	window.open('http://robin.de.marissa.hostorama.ch/osm/opening_hours.js/demo.html' + '?EXP='+encodeURIComponent(value),'_blank');
+}
 
 document.onLoadFunctions.push ( function () {
 
@@ -63,32 +95,8 @@ document.onLoadFunctions.push ( function () {
 	map.addControl (new OpenLayers.Control.Navigation());
 	map.addControl (new OpenLayers.Control.PanZoomBar());
 	map.addControl (new OpenLayers.Control.Permalink());
-
-	//----------------------------------------------------------------------------
-	//	Tooltipschalter
-	//----------------------------------------------------------------------------
-
-	map.addControl (new OpenLayers.Control ({
-
-		id: 'tooltipSwitch',
-
-		draw:function(){
-
-			OpenLayers.Control.prototype.draw.apply(this,arguments);
-			if(!this.element){
-
-				this.element=document.createElement('button');
-				this.element.innerHTML='Namen ein/aus';
-				this.element.onclick = function () {
-					var body=document.getElementsByTagName('body')[0];
-					body.className = body.className ? '' : 'on';
-				}
-				this.element.control=this;
-				this.div.appendChild(this.element);
-			}
-			return this.div;
-		}
-	}));
+	map.addControl (new OpenLayers.Control.ZoomStatus(
+	{html: 'Die Marker werden erst auf Zoom Stufe ${next} geladen. Aktuelle Zoom Stufe ist ${actual}.'}));
 
 	//----------------------------------------------------------------------------
 	//	Kartenlayer
@@ -101,7 +109,7 @@ document.onLoadFunctions.push ( function () {
 	//**	JSONP-POI-Layer
 	//----------------------------------------------------------------------------
 
-	map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('Orte von Interesse', {
+	map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening_hours', {
 
 		//------------------------------------------------------------
 		//	blocksize=0 deaktiviert das Cachen von Markern.
@@ -120,6 +128,7 @@ document.onLoadFunctions.push ( function () {
 		//------------------------------------------------------------
 
 		osmlinks: true,
+		reftime: new Date(),
 
 		createHtmlFromData: function (data) {
 
@@ -130,28 +139,45 @@ document.onLoadFunctions.push ( function () {
 			var text = '<h3>'+h_icon+'&#160;'+h_name+'</h3>\n';
 			text += '<div class="v">'+this.html(data.opening_hours)+'</div>';
 
-			// if (data._time.errors) text+='<div class="e">'+data._time.errors.join('<br/>')+'</div>';
+			evaluateOH(data);
+			if (data._oh_state == 'error') {
+				text += '<div class="e">'+data._oh_object+'</div>';
+			} else {
 
-			// var t= data._time.comment || '';
+				if (this.DisplayMode == 'QA') {
+					var t= data._it_object.getComment() || '';
 
-			// switch (data._time.value) {
-			// case true:	text+='<b class="o">open @ '+this.reftime.toLocaleString()+'<br/>'+t+'</b>'; break;
-			// case false:	text+='<b class="c">closed @ '+this.reftime.toLocaleString()+'<br/>'+t+'</b>'; break;
-			// case null:	text+='<b class="u">unknown @ '+this.reftime.toLocaleString()+'<br/>'+t+'</b>'; break;
-			// }
+					switch (data._it_object.getStateString(true)) {
+					case 'open':	text+='<b class="o">open @ '+this.reftime.toLocaleString()+'<br/>'+t+'</b>'; break;
+					case 'closed':	text+='<b class="c">closed @ '+this.reftime.toLocaleString()+'<br/>'+t+'</b>'; break;
+					case 'unknown':	text+='<b class="u">unknown @ '+this.reftime.toLocaleString()+'<br/>'+t+'</b>'; break;
+					}
 
-			// if (!data._time.value && data._time.times.length>=1)
-			// text+='<div class="o">will open @ '+data._time.times[0].t.toLocaleString()+
-			// 	(data._time.times[0].c? ' ('+data._time.times[0].c+')' : '') + '</div>';
+					var prettified = data._oh_object.prettifyValue();
 
-			// if (data._time.warnings) text+='<div class="m">'+data._time.warnings.join('<br/>')+'</div>';
+					if (data._oh_value != prettified)
+						text += '<br/>' + i18n.t('texts.prettified value') + ': <div class="v">'+prettified+'</div>';
+
+					var warnings = data._oh_object.getWarnings();
+					if (warnings.length > 0)
+						text += '<br/>Warnings: <div class="v">'+warnings.join('<br/>\n')+'</div>';
+				}
+
+				text += OpeningHoursTable.drawTableAndComments(data._oh_object, data._it_object, data._oh_value);
+
+				// if (!data._time.value && data._time.times.length>=1)
+				// text+='<div class="o">will open @ '+data._time.times[0].t.toLocaleString()+
+				// 	(data._time.times[0].c? ' ('+data._time.times[0].c+')' : '') + '</div>';
+
+				// if (data._time.warnings) text+='<div class="m">'+data._time.warnings.join('<br/>')+'</div>';
+			}
 
 			var rows=[];
 			for (var tag in data) {
 				if (data[tag] == '') continue;
 				switch (tag) {
 				case 'id': case 'lat': case 'lon': case 'name': case 'created_by':
-				case 'opening_hours': case '_time':
+				case 'opening_hours': case '_oh_value': case '_oh_state': case '_oh_object': case '_it_object':
 					continue;
 				}
 				val=this.html(data[tag]);
@@ -186,19 +212,21 @@ document.onLoadFunctions.push ( function () {
 		getIconUrl: function (data) {
 
 			if (data.opening_hours) {
-				try {
-					var oh = new opening_hours(data.opening_hours);
-				} catch (err) {
-					crashed = err;
-					console.log(crashed);
-					return 'img/circle_red.png';
+				evaluateOH(data);
+				var oh = data._oh_object;
+				if (this.DisplayMode == 'normal') {
+					switch (data._oh_state) {
+					case 'ok':      return 'img/circle_' + (oh.getState() ? 'green' : (oh.getUnknown() ? 'white' : 'red')) + '.png';
+					case 'error':   return 'img/circle_yellow.png';
+					}
+				} else if (this.DisplayMode == 'QA') {
+					switch (data._oh_state) {
+					case 'ok':      return 'img/circle_green.png';
+					case 'warning': return 'img/circle_yellow.png';
+					case 'error':   return 'img/circle_red.png';
+					}
 				}
-				// return '/img/circle_blue_yellow.png';
-				return 'img/circle_blue_yellow.png';
 			}
-
-
-			// return '/i/ol/circle_red.png';
 		},
 
 		//------------------------------------------------------------
@@ -357,13 +385,33 @@ document.onLoadFunctions.push ( function () {
 			this.parseKeyValues (document.getElementById('tagselector_input').value);
 		},
 
-		//------------------------------------------------------------
-		//	Bestimme den Tooltip-Html-Text zu einem Datensatz (optional).
-		//------------------------------------------------------------
+		DisplayMode: 'normal',
 
-		createTooltipFromData: function (data) {
-			return this.html(data.name || data.ref || '#' + data.id);
-		}
+		filter: OpenLayers.Util.getParameters().filter=='error' ? function (data) {
+				this.DisplayMode = 'QA';
+				return evaluateOH(data) == 'error' || data._oh_object.getWarnings() != '';
+			} : OpenLayers.Util.getParameters().filter=='open' ? function (data) {
+				if (evaluateOH(data) == 'error')
+					return false;
+				else
+					return data._it_object.getState();
+			} : OpenLayers.Util.getParameters().filter=='unknown' ? function (data) {
+				if (evaluateOH(data) == 'error')
+					return false;
+				else
+					return data._it_object.getUnknown();
+			} : OpenLayers.Util.getParameters().filter=='OpenOrUnknown' ? function (data) {
+				if (evaluateOH(data) == 'error')
+					return false;
+				else
+					return data._it_object.getUnknown() || data._it_object.getUnknown();
+			} : null,
+
+		minZoom: 8,
+		blockSize: 0,	// no cache
+		clusterSize: 16,
+		clusterLimit: 50
+
 	} ));
 
 	//----------------------------------------------------------------------------
@@ -390,7 +438,11 @@ document.onLoadFunctions.push ( function () {
 <script type="text/javascript" src="js/OpenStreetMap.js"></script>
 <script type="text/javascript" src="js/popupmarker.js"></script>
 <script type="text/javascript" src="js/loadstatus.js"></script>
+<script type="text/javascript" src="js/zoomstatus.js"></script>
 <script type="text/javascript" src="opening_hours.js/opening_hours.js"></script>
+<script type="text/javascript" src="opening_hours.js/js/i18next-1.6.3.min.js"></script>
+<script type="text/javascript" src="opening_hours.js/js/i18n-resources.js"></script>
+<script type="text/javascript" src="opening_hours.js/js/opening_hours_table.js"></script>
 <style type="text/css">
 .olMap {
 	color: black;
@@ -441,15 +493,15 @@ document.onLoadFunctions.push ( function () {
 	opacity: 0.7;
 }
 
-.olFramedCloudPopupContent {
-	max-height: 400px;
-}
-
-.olFramedCloudPopupContent,
-.olFramedCloudPopupContent table {
-	color: black;
-}
-
+// .olFramedCloudPopupContent {
+// 	max-height: 400px;
+// }
+//
+// .olFramedCloudPopupContent,
+// .olFramedCloudPopupContent table {
+// 	color: black;
+// }
+//
 .olFramedCloudPopupContent h3 {
 	font-size: 120%;
 	font-weight: bold;
@@ -460,25 +512,19 @@ document.onLoadFunctions.push ( function () {
 	height: 16px;
 	width: 16px;
 }
-
-.olFramedCloudPopupContent table {
-	border: 0;
-	margin: 0;
-	padding: 0;
-}
-
-.olFramedCloudPopupContent td {
-	background: transparent;
-	margin: 0;
-	padding: 0;
-}
-
-.olFramedCloudPopupContent p {
-	font-size: xx-small;
-	margin: 0 0 1em;
-	text-align: right;
-}
-
+//
+// .olFramedCloudPopupContent td {
+// 	background: transparent;
+// 	margin: 0;
+// 	padding: 0;
+// }
+//
+// .olFramedCloudPopupContent p {
+// 	font-size: xx-small;
+// 	margin: 0 0 1em;
+// 	text-align: right;
+// }
+//
 .olFramedCloudPopupContent hr {
 	display: none;
 }
@@ -541,67 +587,47 @@ document.onLoadFunctions.push ( function () {
 
 <body>
 <div id="map"></div>
-<div id="tagselector">
-<b>POIs konfigurieren</b>
-<div>
-<textarea id="tagselector_input" cols="24" rows="20">
-opening_hours
-</textarea><br/>
-<button id="tagselector_button">Karte aktualisieren</button>
-</div>
-</div>
-<div id="Xc">
-<h1 class="Xs">POIs per JSONP laden</h1>
 
-<div class="Xa">
-Springe zu:
-<a href="#Xnp" accesskey="S">Seitenhierarchie</a>.
+<div id="tagselector">
+	<b>POIs konfigurieren</b>
+	<div>
+		<textarea id="tagselector_input" cols="24" rows="5">
+		opening_hours
+		</textarea><br/>
+		<button id="tagselector_button">Karte aktualisieren</button>
+	</div>
 </div>
+
+<h1>Karte mit Layer für "opening_hours"</h1>
+
 <p>
-Zum Selbermachen:
-<a href="overpass_pois2.htm">HTML-Code mit Erklärung</a>.
+	Im <a href="http://robin.de.marissa.hostorama.ch/osm/opening_hours_map/opening_hours_map.html">normalen Modus</a> zeigt die Karte Knoten mit dem Tag
+	<a rel="external" href="http://wiki.openstreetmap.org/wiki/Key:opening_hours">opening_hours</a>
+	als farbige Kreise:
+
+	<ul>
+		<li>Grün: <q>jetzt geöffnet</q>,</li>
+		<!-- <li>Blaugelb: <q>24/7 geöffnet</q>,</li> -->
+		<!-- <li>Graublau: <q>geschlossen, öffnet aber heute noch</q>,</li> -->
+		<!-- <li>Grau: <q>geschlossen, öffnet heute nicht mehr</q>,</li> -->
+		<li>Weiß: <q>zur Zeit unbekannt</q>,</li>
+		<li>Rot: <q>zur Zeit geschlossen,</li>
+	</ul>
 </p>
 
 <p>
-Diese Seite gibt es auch <a href="overpass_pois">ohne konfigurierbarer Tag-Liste</a>.
-</p><div id="Xm">
-<hr />
-©&#160;2010-2013 – zuletzt geändert am 16.08.2010
-</div>
-</div>
+	Falls die Karte im <a href="http://robin.de.marissa.hostorama.ch/osm/opening_hours_map/opening_hours_map.html=filter?error">Qualitätssicherung Modus</a> angezeitg wird, werden nur Fehlerhafte opening_hours und welche mit Warnung angezeit. In diesem Modus werden andere Farben benutzt:
 
-<div id="Xd">
-Verbraucherinformation: enthält
-<a href="http://validator.w3.org/check?verbose=1&amp;outline=1&amp;uri=http%3A%2F%2Fwww.netzwolf.info%2Fkartografie%2Fopenlayers%2Foverpass_pois2" rel="nofollow">HTML4.0</a>,
-<a href="http://jigsaw.w3.org/css-validator/validator?uri=http%3A%2F%2Fwww.netzwolf.info%2Fkartografie%2Fopenlayers%2Foverpass_pois2&amp;warning=no" rel="nofollow">CSS</a>
-und eine <a href="/_meta/anbieterkennzeichnung"
-	lang="de"
-	rel="nofollow">Anbieterkennzeichnung</a>.
-<br />
-</div>
+	<ul>
+		<li>Grün: Öffnungszeit kann ohne Warnungen ausgewertet,</li>
+		<li>Gelb: Öffnungszeit kann ausgewertet allerdings mit Warnungen,</li>
+		<li>Rot: Formatfehler oder noch nicht unterstützes Element in den opening_hours,</li>
+	</ul>
+</p>
 
-<div class="Xn">
+<p>
+	Die zugrundeliegende stammen von der <a href="http://overpass-api.de/">Overpass API</a>.
+</p>
 
-<hr />
-<h2>Navigation</h2>
-
-<div id="Xntpls">
-<div id="Xnpls">
-
-<div id="Xnp"><h3>Seitenhierarchie</h3>
-<ul>
-<li class="X1"><a href="/"
-	rel="start">Netzwolf</a></li>
-<li><a href="/kartografie/">Kartografie</a></li>
-<li><a href="/kartografie/openlayers/">OpenLayers</a></li>
-<li><span class="Xs">POIs per JSONP</span></li>
-</ul>
-</div>
-
-<div id="Xnls">
-</div>
-</div>
-</div>
-</div>
 </body>
 </html>

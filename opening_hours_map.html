@@ -23,39 +23,10 @@ var poi_layer;
 var permalinkParams={};
 var permalinkObject;
 
-function evaluateOH(data) {
-	if (data.opening_hours && typeof data._oh_state == 'undefined') {
-		data._oh_value = data.opening_hours; // The opening_hours syntax is used for other tags as well.
-		var crashed = true;
-		try {
-			var oh = new opening_hours(data._oh_value, nominatiomTestJSON);
-			var it = oh.getIterator(this.reftime);
-			crashed = false;
-		} catch (err) {
-			crashed = err;
-			data._oh_object = crashed;
-			data._oh_state = 'error';
-		}
-
-		if (!crashed) {
-			data._oh_object = oh;
-			data._it_object = it;
-			if (oh.getWarnings().length > 0) {
-				data._oh_state = 'warning';
-			} else {
-				data._oh_state = 'ok';
-			}
-		}
-		return data._oh_state;
-	}
-}
-
 function Evaluate(number, reset, value) {
 	window.open('http://robin.de.marissa.hostorama.ch/osm/opening_hours.js/demo.html' + '?EXP='+encodeURIComponent(value),'_blank');
 }
 
-
-var nominatiomTestJSON = {"place_id":"44651229","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"way","osm_id":"36248375","lat":"49.5400039","lon":"9.7937133","display_name":"K 2847, Lauda-K\u00f6nigshofen, Main-Tauber-Kreis, Regierungsbezirk Stuttgart, Baden-W\u00fcrttemberg, Germany, European Union","address":{"road":"K 2847","city":"Lauda-K\u00f6nigshofen","county":"Main-Tauber-Kreis","state_district":"Regierungsbezirk Stuttgart","state":"Baden-W\u00fcrttemberg","country":"Germany","country_code":"de","continent":"European Union"}};
 
 document.onLoadFunctions.push ( function () {
 
@@ -142,12 +113,11 @@ document.onLoadFunctions.push ( function () {
 			var text = '<h3>'+h_icon+'&#160;'+h_name+'</h3>\n';
 			text += '<div class="v">'+this.html(data.opening_hours)+'</div>';
 
-			evaluateOH(data);
+			this.evaluateOH(data);
 			if (data._oh_state == 'error') {
 				text += '<div class="e">'+data._oh_object+'</div>';
 			} else {
 
-				if (this.DisplayMode == 'QA') {
 					var t= data._it_object.getComment() || '';
 
 					switch (data._it_object.getStateString(true)) {
@@ -156,17 +126,17 @@ document.onLoadFunctions.push ( function () {
 					case 'unknown':	text+='<b class="u">unknown @ '+this.reftime.toLocaleString()+'<br/>'+t+'</b>'; break;
 					}
 
-					var prettified = data._oh_object.prettifyValue();
+				var prettified = data._oh_object.prettifyValue();
 
-					if (data._oh_value != prettified)
-						text += '<br/>' + i18n.t('texts.prettified value') + ': <div class="v">'+prettified+'</div>';
+				if (data._oh_value != prettified)
+					text += '<br/>' + i18n.t('texts.prettified value') + ': <div class="v">'+prettified+'</div>';
 
-					var warnings = data._oh_object.getWarnings();
-					if (warnings.length > 0)
-						text += '<br/>Warnings: <div class="v">'+warnings.join('<br/>\n')+'</div>';
-				}
+				var warnings = data._oh_object.getWarnings();
+				if (warnings.length > 0)
+					text += '<br/>Warnings: <div class="v">'+warnings.join('<br/>\n')+'</div>';
 
-				text += OpeningHoursTable.drawTableAndComments(data._oh_object, data._it_object, data._oh_value);
+				data._it_object.setDate(this.reftime);
+				text += OpeningHoursTable.drawTableAndComments(data._oh_object, data._it_object, encodeURIComponent(data._oh_value));
 
 				// if (!data._time.value && data._time.times.length>=1)
 				// text+='<div class="o">will open @ '+data._time.times[0].t.toLocaleString()+
@@ -179,7 +149,7 @@ document.onLoadFunctions.push ( function () {
 			for (var tag in data) {
 				if (data[tag] == '') continue;
 				switch (tag) {
-				case 'id': case 'lat': case 'lon': case 'name': case 'created_by':
+				case 'name': case 'created_by':
 				case 'opening_hours': case '_oh_value': case '_oh_state': case '_oh_object': case '_it_object':
 					continue;
 				}
@@ -215,19 +185,12 @@ document.onLoadFunctions.push ( function () {
 		getIconUrl: function (data) {
 
 			if (data.opening_hours) {
-				evaluateOH(data);
+				this.evaluateOH(data);
 				var oh = data._oh_object;
-				if (this.DisplayMode == 'normal') {
-					switch (data._oh_state) {
-					case 'ok':      return 'img/circle_' + (oh.getState() ? 'green' : (oh.getUnknown() ? 'white' : 'red')) + '.png';
-					case 'error':   return 'img/circle_yellow.png';
-					}
-				} else if (this.DisplayMode == 'QA') {
-					switch (data._oh_state) {
-					case 'ok':      return 'img/circle_green.png';
-					case 'warning': return 'img/circle_yellow.png';
-					case 'error':   return 'img/circle_red.png';
-					}
+				switch (data._oh_state) {
+				case 'ok': case 'warning': return 'img/circle_' + (oh.getState() ? 'green' : (oh.getUnknown() ? 'yellow' : 'red'))
+					   + (data._oh_state == 'warning' ? '_warn' : '') + '.png';
+				case 'error':   return 'img/circle_err.png';
 				}
 			}
 		},
@@ -346,7 +309,8 @@ document.onLoadFunctions.push ( function () {
 				if (key) kvlist.push ('k="' + this.html(key) + '"');
 				if (value) kvlist.push ('v="' + this.html(value) + '"');
 				kvlist.push ("/>");
-				components.push ('<query type="node">' + bboxQuery + kvlist.join(' ') + '</query>');
+				components.push('<query type="node">' + bboxQuery + kvlist.join(' ') + '</query>');
+				components.push('<query type="way">'  + bboxQuery + kvlist.join(' ') + '</query>');
 			}
 
 			var xml = '<osm-script output="json"><union>' + components.join('') + '</union><print/></osm-script>';
@@ -354,10 +318,46 @@ document.onLoadFunctions.push ( function () {
 			return xml;
 		},
 
+		evaluateOH: function (data) {
+			if (data.opening_hours && typeof data._oh_state == 'undefined') {
+				data._oh_value = data.opening_hours; // The opening_hours syntax is used for other tags as well.
+				var crashed = true;
+				try {
+					var oh = new opening_hours(data._oh_value, this.nominatim);
+					var it = oh.getIterator(this.reftime);
+					crashed = false;
+				} catch (err) {
+					crashed = err;
+					data._oh_object = crashed;
+					data._oh_state = 'error';
+				}
+
+				if (!crashed) {
+					data._oh_object = oh;
+					data._it_object = it;
+					if (oh.getWarnings().length > 0) {
+						data._oh_state = 'warning';
+					} else {
+						data._oh_state = 'ok';
+					}
+				}
+				return data._oh_state;
+			}
+		},
+
+
+		lastLat: undefined,
+		lastLon: undefined,
+		nominatim: undefined,
+		url_lang: 'de',
+
 		//------------------------------------------------------------
 		//	Callback-Funktion für JSONP:
 		//	Löscht die bestehenden POIs und trägt die neuen ein.
 		//------------------------------------------------------------
+
+		createMarkerFromData: function(elements) {
+		},
 
 		jsonCallback: function (data) {
 
@@ -367,6 +367,42 @@ document.onLoadFunctions.push ( function () {
 				return;
 			}
 			this.erase (true);
+
+			var nominatim;
+			if (typeof this.lastLat == 'undefined'
+				|| Math.abs(this.lastLat - elements[0].lat) > 2
+				|| Math.abs(this.lastLon - elements[0].lon) > 2) {
+				var url = 'http://open.mapquestapi.com/nominatim/v1/reverse.php';
+				url += '?format=json&osm_type=' + elements[0].type.substr(0,1).toUpperCase() + '&osm_id=' + elements[0].id
+					+ '&zoom=18&addressdetails=1&email=ypid23@aol.de';
+				var url_lang_set = 'accept-language=';
+
+				var xhr = new XMLHttpRequest();
+				xhr.open( "GET", url + '&' + url_lang_set + this.url_lang, false );      // true makes this call asynchronous
+				xhr.onreadystatechange = function () {    // need eventhandler since our call is async
+					if ( xhr.readyState == 4 && xhr.status == 200 ) {  // check for success
+						nominatim = JSON.parse( xhr.responseText );
+
+						// console.log(JSON.stringify(this.nominatim, null, '\t'));
+						if (this.nominatim.address.country_code != this.url_lang) {
+							xhr.open( "GET", url + '&' + url_lang_set + this.nominatim.address.country_code, false );
+							xhr.onreadystatechange = function () {
+								if ( xhr.readyState == 4 && xhr.status == 200 ) {  // check for success
+									nominatim = JSON.parse( xhr.responseText );
+								}
+								this.url_lang = this.nominatim.address.country_code;
+							}
+							xhr.send(null);
+						}
+					}
+				};
+				xhr.send(null);
+				this.nominatim = nominatim;
+
+				this.lastLat = elements[0].lat;
+				this.lastLon = elements[0].lon;
+			}
+
 			for (var i in elements) {
 				var element = elements[i];
 				var data = element.tags;
@@ -377,6 +413,7 @@ document.onLoadFunctions.push ( function () {
 				data.lon = element.lon;
 				this.createMarker (data);
 			}
+
 		},
 
 		//------------------------------------------------------------
@@ -388,23 +425,20 @@ document.onLoadFunctions.push ( function () {
 			this.parseKeyValues (document.getElementById('tagselector_input').value);
 		},
 
-		DisplayMode: 'normal',
-
 		filter: OpenLayers.Util.getParameters().filter=='error' ? function (data) {
-				this.DisplayMode = 'QA';
-				return evaluateOH(data) == 'error' || data._oh_object.getWarnings() != '';
+				return this.evaluateOH(data) == 'error' || data._oh_object.getWarnings().length > 0;
 			} : OpenLayers.Util.getParameters().filter=='open' ? function (data) {
-				if (evaluateOH(data) == 'error')
+				if (this.evaluateOH(data) == 'error')
 					return false;
 				else
 					return data._it_object.getState();
 			} : OpenLayers.Util.getParameters().filter=='unknown' ? function (data) {
-				if (evaluateOH(data) == 'error')
+				if (this.evaluateOH(data) == 'error')
 					return false;
 				else
 					return data._it_object.getUnknown();
 			} : OpenLayers.Util.getParameters().filter=='OpenOrUnknown' ? function (data) {
-				if (evaluateOH(data) == 'error')
+				if (this.evaluateOH(data) == 'error')
 					return false;
 				else
 					return data._it_object.getUnknown() || data._it_object.getUnknown();
@@ -443,6 +477,7 @@ document.onLoadFunctions.push ( function () {
 <script type="text/javascript" src="js/loadstatus.js"></script>
 <script type="text/javascript" src="js/zoomstatus.js"></script>
 <script type="text/javascript" src="opening_hours.js/opening_hours.js"></script>
+<script type="text/javascript" src="opening_hours.js/js/suncalc/suncalc.js"></script>
 <script type="text/javascript" src="opening_hours.js/js/i18next-1.6.3.min.js"></script>
 <script type="text/javascript" src="opening_hours.js/js/i18n-resources.js"></script>
 <script type="text/javascript" src="opening_hours.js/js/opening_hours_table.js"></script>
@@ -590,6 +625,9 @@ document.onLoadFunctions.push ( function () {
 
 <body>
 <div id="map"></div>
+<script type="text/javascript">
+	document.write(getUserSelectTranslateHTMLCode());
+</script>
 
 <div id="tagselector">
 	<b>POIs konfigurieren</b>
@@ -613,24 +651,26 @@ document.onLoadFunctions.push ( function () {
 		<!-- <li>Blaugelb: <q>24/7 geöffnet</q>,</li> -->
 		<!-- <li>Graublau: <q>geschlossen, öffnet aber heute noch</q>,</li> -->
 		<!-- <li>Grau: <q>geschlossen, öffnet heute nicht mehr</q>,</li> -->
-		<li>Weiß: <q>zur Zeit unbekannt</q>,</li>
+		<li>Gelb: <q>zur Zeit unbekannt</q>,</li>
 		<li>Rot: <q>zur Zeit geschlossen,</li>
+		<li>Weiß: <q>Öffnungszeit kann nicht ausgewertet werden.</q>,</li>
 	</ul>
+
+	Sollte eine Öffnungszeit beim verarbeiten eine Warnung erzeugen, wird im Status Icon ein Gelbes <q>W</q> angezeigt.
 </p>
 
 <p>
-	Falls die Karte im <a href="http://robin.de.marissa.hostorama.ch/osm/opening_hours_map/opening_hours_map.html=filter?error">Qualitätssicherung Modus</a> angezeitg wird, werden nur Fehlerhafte opening_hours und welche mit Warnung angezeit. In diesem Modus werden andere Farben benutzt:
+	Die Karte kann auch mit einem Filter aufgerufen werden oder <a href="http://robin.de.marissa.hostorama.ch/osm/opening_hours_map/opening_hours_map.html?filter=error">Qualitätssicherungs Modus</a>. Es werden nur Fehlerhafte opening_hours und welche mit Warnung angezeit.
 
-	<ul>
-		<li>Grün: Öffnungszeit kann ohne Warnungen ausgewertet,</li>
-		<li>Gelb: Öffnungszeit kann ausgewertet allerdings mit Warnungen,</li>
-		<li>Rot: Formatfehler oder noch nicht unterstützes Element in den opening_hours,</li>
-	</ul>
 </p>
 
 <p>
 	Die zugrundeliegende stammen von der <a href="http://overpass-api.de/">Overpass API</a>.
 </p>
+
+<script type="text/javascript">
+document.write(i18n.t('texts.this website', { url: 'https://github.com/ypid/opening_hours_map', hoster: 'GitHub' }));
+</script>
 
 </body>
 </html>

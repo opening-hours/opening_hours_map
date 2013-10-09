@@ -27,6 +27,27 @@ function Evaluate(number, reset, value) {
 	window.open('http://robin.de.marissa.hostorama.ch/osm/opening_hours.js/demo.html' + '?EXP='+encodeURIComponent(value),'_blank');
 }
 
+// from https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
+function editPopupContent(content, lat, lon, type, id)
+{
+	var type = type.substr(0, 1);
+	// add some links to the bottom of a popup
+	content += '<br />';
+	content += '<a href="http://www.openstreetmap.org/edit?editor=id&'+type+'='+id+'" target="_blank">iD</a>&nbsp;&nbsp;';
+	content +=
+		'<a href="http://www.openstreetmap.org/edit?'+type+'='+id+'&editor=potlatch2" target="_blank">Potlatch</a>'+
+		'&nbsp;&nbsp;<a href="http://localhost:8111/load_object?objects='+ type+id+'&select='+type+id+'" target="josm" onclick="return josm(this.href)">JOSM</a>'+
+		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/browse/'+type+'/'+id+'" target="_blank">Details</a>';
+	return content;
+}
+
+// from https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
+// prevent josm remote plugin of showing message
+function josm(url)
+{
+	return true;
+}
+
 
 document.onLoadFunctions.push ( function () {
 
@@ -106,7 +127,6 @@ document.onLoadFunctions.push ( function () {
 
 		createHtmlFromData: function (data) {
 
-			var base_url = 'http://www.netzwolf.info/kartografie/osm/time_domain/';
 			var h_icon = '<img src="' + this.getIconUrl(data) + '" alt=""/>';
 			var h_name = this.html(data.name||data.ref||data.operator||data.shop||data.amenity||data.id);
 
@@ -149,7 +169,7 @@ document.onLoadFunctions.push ( function () {
 			for (var tag in data) {
 				if (data[tag] == '') continue;
 				switch (tag) {
-				case 'name': case 'created_by':
+				case 'id': case '_id': case 'lat': case 'lon': case 'name': case 'created_by':
 				case 'opening_hours': case '_oh_value': case '_oh_state': case '_oh_object': case '_it_object':
 					continue;
 				}
@@ -159,7 +179,7 @@ document.onLoadFunctions.push ( function () {
 					var list=data[tag].split (';');
 					for (var i=0; i<list.length;i++) {
 						var ele=this.html(OpenLayers.String.trim(list[i]));
-						res.push ('<a target="_blank" href="' + base_url +ele+'">'+ele+'</a>');
+						res.push ('<a target="_blank" href="' + ele+'">'+ele+'</a>');
 					}
 					val=res.join('; ');
 				}
@@ -168,10 +188,7 @@ document.onLoadFunctions.push ( function () {
 
 			if (rows.length>=1) text += '<table>'+rows.join('\n')+'</table>\n';
 
-			var osmlinks = this.createOsmLinks (data);
-			if (osmlinks) text += '<p>'+osmlinks+'</p>\n';
-
-			return text;
+			return editPopupContent(text, data.lat, data.lon, data._type, data._id);
 		},
 
 		//------------------------------------------------------------
@@ -407,7 +424,10 @@ document.onLoadFunctions.push ( function () {
 				var element = elements[i];
 				var data = element.tags;
 				if (!data) data = {};
-				if (element.id) data.id = (element.type ? element.type.substr(0,1) : '') + element.id;
+				if (element.id) {
+					data.id = (element.type ? element.type.substr(0,1) : '') + element.id;
+					data._id = element.id;
+				}
 				if (element.type) data._type = element.type;
 				data.lat = element.lat;
 				data.lon = element.lon;

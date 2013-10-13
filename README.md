@@ -9,7 +9,7 @@ This map shows the opening_hours as nicely readable time table.
 [online]: http://robin.de.marissa.hostorama.ch/osm/opening_hours_map/opening_hours_map.html
 
 # Dependencies
-* This map uses the [opening_hours.js][oh-lib].
+* This map uses the [opening_hours.js][oh-lib] library.
 
 [oh-lib]: https://github.com/ypid/opening_hours.js
 

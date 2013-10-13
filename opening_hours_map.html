@@ -11,6 +11,9 @@
 <link rel="stylesheet" href="opening_hours.js/css/table.css"/>
 <script type="text/javascript">
 /*<![CDATA[*/
+var repo_url = 'https://github.com/ypid/opening_hours_map';
+var html_url = 'http://robin.de.marissa.hostorama.ch/osm/opening_hours_map/opening_hours_map.html';
+var wiki_url = 'http://wiki.openstreetmap.org/wiki/Key:opening_hours';
 var map;
 
 if (!document.onLoadFunctions) {
@@ -447,6 +450,10 @@ document.onLoadFunctions.push ( function () {
 
 		filter: OpenLayers.Util.getParameters().filter=='error' ? function (data) {
 				return this.evaluateOH(data) == 'error' || data._oh_object.getWarnings().length > 0;
+			} : OpenLayers.Util.getParameters().filter=='errorOnly' ? function (data) {
+				return this.evaluateOH(data) == 'error';
+			} : OpenLayers.Util.getParameters().filter=='warnOnly' ? function (data) {
+				return this.evaluateOH(data) != 'error' && data._oh_object.getWarnings().length > 0;
 			} : OpenLayers.Util.getParameters().filter=='open' ? function (data) {
 				if (this.evaluateOH(data) == 'error')
 					return false;
@@ -464,7 +471,7 @@ document.onLoadFunctions.push ( function () {
 					return data._it_object.getUnknown() || data._it_object.getUnknown();
 			} : null,
 
-		minZoom: 14,
+		minZoom: 11,
 		blockSize: 0,	// no cache
 		clusterSize: 16,
 		clusterLimit: 50
@@ -645,51 +652,56 @@ document.onLoadFunctions.push ( function () {
 
 <body>
 <div id="map"></div>
+
+<script type="text/javascript">
+	document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');
+</script>
 <script type="text/javascript">
 	document.write(getUserSelectTranslateHTMLCode());
 </script>
 
 <div id="tagselector">
-	<b>POIs konfigurieren</b>
+	<script type="text/javascript">
+		document.write('<h2>' + i18n.t('texts.config POIs') + '</h2>');
+	</script>
 	<div>
 		<textarea id="tagselector_input" cols="24" rows="5">
 		opening_hours
 		</textarea><br/>
-		<button id="tagselector_button">Karte aktualisieren</button>
+		<script type="text/javascript">
+			document.write('<button id="tagselector_button">' + i18n.t('texts.reload map') + '</button>');
+		</script>
 	</div>
 </div>
 
-<h1>Karte mit Layer für "opening_hours"</h1>
-
-<p>
-	Im <a href="http://robin.de.marissa.hostorama.ch/osm/opening_hours_map/opening_hours_map.html">normalen Modus</a> zeigt die Karte Knoten mit dem Tag
-	<a rel="external" href="http://wiki.openstreetmap.org/wiki/Key:opening_hours">opening_hours</a>
-	als farbige Kreise:
-
-	<ul>
-		<li>Grün: <q>jetzt geöffnet</q>,</li>
-		<!-- <li>Blaugelb: <q>24/7 geöffnet</q>,</li> -->
-		<!-- <li>Graublau: <q>geschlossen, öffnet aber heute noch</q>,</li> -->
-		<!-- <li>Grau: <q>geschlossen, öffnet heute nicht mehr</q>,</li> -->
-		<li>Gelb: <q>zur Zeit unbekannt</q>,</li>
-		<li>Rot: <q>zur Zeit geschlossen,</li>
-		<li>Weiß: <q>Öffnungszeit kann nicht ausgewertet werden.</q>,</li>
-	</ul>
-
-	Sollte eine Öffnungszeit beim verarbeiten eine Warnung erzeugen, wird im Status Icon ein Gelbes <q>W</q> angezeigt.
-</p>
-
-<p>
-	Die Karte kann auch mit einem Filter aufgerufen werden oder <a href="http://robin.de.marissa.hostorama.ch/osm/opening_hours_map/opening_hours_map.html?filter=error">Qualitätssicherungs Modus</a>. Es werden nur Fehlerhafte opening_hours und welche mit Warnung angezeit.
-
-</p>
-
-<p>
-	Die zugrundeliegende stammen von der <a href="http://overpass-api.de/">Overpass API</a>.
-</p>
-
+<!-- <li>Blaugelb: <q>24/7 geöffnet</q>,</li> -->
+<!-- <li>Graublau: <q>geschlossen, öffnet aber heute noch</q>,</li> -->
+<!-- <li>Grau: <q>geschlossen, öffnet heute nicht mehr</q>,</li> -->
 <script type="text/javascript">
-document.write(i18n.t('texts.this website', { url: 'https://github.com/ypid/opening_hours_map', hoster: 'GitHub' }));
+	document.write('<p>');
+	document.write(i18n.t('texts.map is showing', { mapUrl: html_url, wikiUrl: wiki_url }));
+	document.write('<ul>');
+	document.write('<li>' + i18n.t('words.green')  + ': ' + i18n.t('texts.open now') + '</li>');
+	document.write('<li>' + i18n.t('words.yellow') + ': ' + i18n.t('texts.unknown now') + '</li>');
+	document.write('<li>' + i18n.t('words.red')    + ': ' + i18n.t('texts.closed now') + '</li>');
+	document.write('<li>' + i18n.t('words.violet')    + ': ' + i18n.t('texts.error') + '</li>');
+	document.write('</ul>');
+	document.write(i18n.t('texts.warning', { sign: '<q>W</q>' }));
+	document.write('</p><p>');
+	document.write(i18n.t('texts.map filter'));
+	document.write('<ul>');
+	document.write('<li>' + '<a href="' + html_url + '?filter=error">' + i18n.t('texts.warn error') + '</a></li>');
+	document.write('<li>' + '<a href="' + html_url + '?filter=warnOnly">' + i18n.t('texts.warnings only') + '</a></li>');
+	document.write('<li>' + '<a href="' + html_url + '?filter=errorOnly">' + i18n.t('texts.error only') + '</a></li>');
+	document.write('<li>' + '<a href="' + html_url + '?filter=open">' + i18n.t('texts.facilitiy which is open now') + '</a></li>');
+	document.write('<li>' + '<a href="' + html_url + '?filter=closed">' + i18n.t('texts.facilitiy which is closed now') + '</a></li>');
+	document.write('<li>' + '<a href="' + html_url + '?filter=unknown">' + i18n.t('texts.facilitiy which is unknown now') + '</a></li>');
+	document.write('<li>' + '<a href="' + html_url + '?filter=OpenOrUnknown">' + i18n.t('texts.facilitiy which is open/unknown now') + '</a></li>');
+	document.write('</ul>');
+	document.write('</p><p>');
+	document.write(i18n.t('texts.data source', { APIaTag: '<a href="http://overpass-api.de/">Overpass API</a>', OSMaTag: '<a href="http://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>' }) + '<br />');
+	document.write(i18n.t('texts.this website', { url: repo_url, hoster: 'GitHub' }));
+	document.write('</p>');
 </script>
 
 </body>

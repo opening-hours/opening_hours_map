@@ -31,26 +31,26 @@ function Evaluate(number, reset, value) {
 }
 
 // from https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
-function editPopupContent(content, lat, lon, type, id)
-{
+function editPopupContent(content, lat, lon, type, id, oh_value) {
 	var short_type = type.substr(0, 1);
 	// add some links to the bottom of a popup
 	content += '<br />';
 	content += '<a href="http://www.openstreetmap.org/edit?editor=id&'+short_type+'='+id+'" target="_blank">iD</a>&nbsp;&nbsp;';
 	content +=
 		'<a href="http://www.openstreetmap.org/edit?'+short_type+'='+id+'&editor=potlatch2" target="_blank">Potlatch</a>'+
-		'&nbsp;&nbsp;<a href="http://localhost:8111/load_object?objects='+ short_type+id+'&select='+short_type+id+'" target="josm" onclick="return josm(this.href)">JOSM</a>'+
-		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/browse/'+type+'/'+id+'" target="_blank">Details</a>';
+		'&nbsp;&nbsp;<a href="javascript:josm(\'' + short_type + '\', \'' + id + '\')">JOSM</a>'+
+		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/browse/'+type+'/'+id+'" target="_blank">Details</a>'
+		+ '&nbsp;&nbsp;<a href="http://robin.de.marissa.hostorama.ch/osm/opening_hours.js/demo.html?EXP='
+		+ encodeURIComponent(oh_value) + '" target="_blank">Test opening_hours</a>';
 	return content;
 }
 
-// from https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
+// Using a different way to than https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
 // prevent josm remote plugin of showing message
-function josm(url)
-{
-	return true;
+// FIXME: Warning in console. Encoding stuff.
+function josm(short_type, id) {
+		top.hiddenframe.location.href = 'http://localhost:8111/load_object?objects='+ short_type+id+'&select='+short_type+id;
 }
-
 
 document.onLoadFunctions.push ( function () {
 
@@ -191,7 +191,7 @@ document.onLoadFunctions.push ( function () {
 
 			if (rows.length>=1) text += '<table>'+rows.join('\n')+'</table>\n';
 
-			return editPopupContent(text, data.lat, data.lon, data._type, data._id);
+			return editPopupContent(text, data.lat, data.lon, data._type, data._id, data._oh_value);
 		},
 
 		//------------------------------------------------------------
@@ -468,7 +468,7 @@ document.onLoadFunctions.push ( function () {
 				if (this.evaluateOH(data) == 'error')
 					return false;
 				else
-					return data._it_object.getUnknown() || data._it_object.getUnknown();
+					return data._it_object.getState() || data._it_object.getUnknown();
 			} : null,
 
 		minZoom: 11,
@@ -652,6 +652,7 @@ document.onLoadFunctions.push ( function () {
 
 <body>
 <div id="map"></div>
+<iframe style='hidden' name='hiddenframe'></iframe>
 
 <script type="text/javascript">
 	document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');

@@ -41,7 +41,7 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
 		'&nbsp;&nbsp;<a href="javascript:josm(\'' + short_type + '\', \'' + id + '\')">JOSM</a>'+
 		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/browse/'+type+'/'+id+'" target="_blank">Details</a>'
 		+ '&nbsp;&nbsp;<a href="http://robin.de.marissa.hostorama.ch/osm/opening_hours.js/demo.html?EXP='
-		+ encodeURIComponent(oh_value) + '" target="_blank">Test opening_hours</a>';
+		+ encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">Test opening_hours</a>';
 	return content;
 }
 

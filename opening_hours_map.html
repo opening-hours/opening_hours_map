@@ -56,7 +56,17 @@ var tmp = 0;
 var tags_to_mode = {
 	'opening_hours'        : [ 0, tmp++ ], // [ mode, selectedIndex, options hash from real_test ]
 	'collection_times'     : [ 2, tmp++ ],
-	'lit'                  : [ 0, tmp++, { } ],
+	'lit'                  : [ 0, tmp++,
+		{
+			map: {
+				'yes'      : 'sunset-sunrise open "specified as yes"',
+				'no'       : 'closed "specified as no"',
+				'automatic': 'unknown "specified as automatic"',
+				'interval' : 'unknown "specified as interval"',
+				'limited'  : 'unknown "specified as limited"',
+			}
+		}
+	],
 	// 'opening_hours:*'   : [ 0, tmp++ ],
 	// '*:opening_hours'   : [ 0, tmp++ ],
 	// '*:opening_hours:*' : [ 0, tmp++ ],
@@ -340,6 +350,15 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 				for (var i=0; i < OSM_tags.length; i++) {
 					if (typeof data[OSM_tags[i]] == 'string') {
 						data._oh_value = data[OSM_tags[i]];
+						if (typeof tags_to_mode[OSM_tags[i]] == 'object'
+							&& typeof tags_to_mode[OSM_tags[i]][2] == 'object'
+							&& typeof tags_to_mode[OSM_tags[i]][2].map == 'object') {
+								var map = tags_to_mode[OSM_tags[i]][2].map;
+								console.log("value", map[data._oh_value], data._oh_value);
+								console.log(JSON.stringify(map, null, '\t'));
+								if (typeof map[data._oh_value] == 'string')
+									data._oh_value = map[data._oh_value];
+						}
 						break;
 					}
 				}

@@ -6,7 +6,7 @@
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 >
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Auswertung des Tags opening_hours auf einer Karte von OpenStreetMap</title>
+<title>Map with layer for the tag opening_hours based on OpenStreetMap</title>
 <meta name="description" content="Auswertung des Tags opening_hours auf einer Karte von OpenStreetMap" />
 <link rel="stylesheet" href="opening_hours.js/css/table.css"/>
 <script type="text/javascript">
@@ -46,7 +46,7 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
 	return content;
 }
 
-// Using a different way to than https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
+// Using a different way to load stuff in JOSM than https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
 // prevent josm remote plugin of showing message
 // FIXME: Warning in console. Encoding stuff.
 function josm(url_param) {
@@ -686,6 +686,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 
 <script type="text/javascript">
 	document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');
+	document.title = i18n.t('texts.heading map');
 </script>
 <script type="text/javascript">
 	document.write(getUserSelectTranslateHTMLCode());

@@ -13,6 +13,9 @@ This map shows the opening_hours as nicely readable time table.
 
 [oh-lib]: https://github.com/ypid/opening_hours.js
 
+# Author
+[Robin `ypid` Schneider](http://wiki.openstreetmap.org/wiki/User:Ypid)
+
 # Credits
 Big thanks goes to Netzwolf how created some OpenLayers extensions and [examples][]. He also created the same map showing opening\_hours with his JS implementation (which is withdrawn in favour of opening\_hours.js). Big parts of his code are still in use for the map. Although most code around the opening\_hours interpretation was rewritten.
 

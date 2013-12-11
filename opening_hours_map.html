@@ -161,7 +161,7 @@ map.addControl (new OpenLayers.Control.Navigation());
 map.addControl (new OpenLayers.Control.PanZoomBar());
 map.addControl (new OpenLayers.Control.Permalink());
 map.addControl (new OpenLayers.Control.ZoomStatus(
-{html: 'Die Marker werden erst auf Zoom Stufe ${next} geladen. Aktuelle Zoom Stufe ist ${actual}.'}));
+{html: i18n.t('texts.low zoom level') }));
 map.addControl(new OpenLayers.Control.Attribution());
 
 //----------------------------------------------------------------------------

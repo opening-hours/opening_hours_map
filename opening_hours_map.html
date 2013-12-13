@@ -261,6 +261,37 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 			return editPopupContent(text, data.lat, data.lon, data._type, data._id, data._oh_value);
 		},
 
+		// copy past from js/popupmarker.js to change the translation
+		createHtmlFromList: function (list) {
+
+			var items = [];
+			var clusters = [];
+			var nItems=0;
+			var limit = this.clusterLimit && this.clusterLimit<list.length ? this.clusterLimit : list.length;
+			for (var i=0; i<list.length; i++) {
+				if (list[i]._csize || list[i].cluster) {
+					clusters.push (this.createHtmlFromData(list[i]));
+				} else {
+					nItems++;
+					if (items.length<limit) {
+						items.push (this.createHtmlFromData(list[i]));
+					}
+				}
+			}
+			if (nItems>limit) {
+				if (limit!=1) {
+					items.unshift(i18n.t('texts.the first entries', { number: items.length, total: nItems } ) );
+				}
+			} else if (items.length) {
+				if (limit!=1) {
+					items.unshift(i18n.t('texts.all n entries', { total: nItems } ) );
+				}
+			} else {
+				items=clusters;
+			}
+			return items.join('<hr/>\n');
+		},
+
 		//------------------------------------------------------------
 		//	Icons
 		//------------------------------------------------------------

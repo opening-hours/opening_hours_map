@@ -190,9 +190,8 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 	reftime: new Date(),
 
 	createHtmlFromData: function (data) {
-
 		var h_icon = '<img src="' + this.getIconUrl(data) + '" alt=""/>';
-		var h_name = this.html(data.name||data.ref||data.operator||data.shop||data.amenity||data.id);
+		var h_name = this.html(data.name||data.ref||data.operator||data.shop||data.amenity||data.craft||data.id);
 
 		var text = '<h3>'+h_icon+'&#160;'+h_name+'</h3>\n';
 		text += '<div class="v">'+this.html(data._oh_value)+'</div>';

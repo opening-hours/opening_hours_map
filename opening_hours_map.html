@@ -38,19 +38,12 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
 	content += '<a href="http://www.openstreetmap.org/edit?editor=id&'+short_type+'='+id+'" target="_blank">iD</a>&nbsp;&nbsp;';
 	content +=
 		'<a href="http://www.openstreetmap.org/edit?'+short_type+'='+id+'&editor=potlatch2" target="_blank">Potlatch</a>'+
-		'&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('http://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">JOSM all with this value</a>'+
+		'&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('http://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18n.t('texts.load all with JOSM') + '</a>'+
 		'&nbsp;&nbsp;<a href="javascript:josm(\'load_object?objects=' + short_type + id + '&select=' + short_type + id + '\')">JOSM</a>'+
 		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/browse/'+type+'/'+id+'" target="_blank">Details</a>'
 		+ '&nbsp;&nbsp;<a href="http://openingh.openstreetmap.de/evaluation_tool/index.html?EXP='
-		+ encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">Test opening_hours</a>';
+		+ encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">' + i18n.t('texts.evaluation tool') + '</a>';
 	return content;
-}
-
-// Using a different way to load stuff in JOSM than https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
-// prevent josm remote plugin of showing message
-// FIXME: Warning in console. Encoding stuff.
-function josm(url_param) {
-	top.hiddenframe.location.href = 'http://localhost:8111/' + url_param;
 }
 
 var tmp = 0;
@@ -263,7 +256,6 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 
 		// copy past from js/popupmarker.js to change the translation
 		createHtmlFromList: function (list) {
-
 			var items = [];
 			var clusters = [];
 			var nItems=0;
@@ -324,7 +316,6 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		//------------------------------------------------------------
 
 		moveTo: function (bounds, zoomChanged, dragging) {
-
 			OpenLayers.Layer.Markers.prototype.moveTo.apply(this,arguments);
 
 			if (dragging || !this.visibility || this.map.zoom<this.minZoom) return;
@@ -338,7 +329,6 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		//------------------------------------------------------------
 
 		reloadPOIs: function () {
-
 			if (this.updateKeyValues) this.updateKeyValues();
 
 			var xml = this.overpassXML (this.keyValues);
@@ -347,11 +337,10 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		},
 
 		//------------------------------------------------------------
-		//	Baue aus der keyValues eine overpass-Anfrage.
+		//	Baue aus den keyValues eine overpass-Anfrage.
 		//------------------------------------------------------------
 
 		overpassXML: function (keyvalues) {
-
 			if (!(keyvalues instanceof Array)) keyvalues = [keyvalues];
 
 			var bbox = this.map.getExtent().
@@ -425,7 +414,6 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 			}
 		},
 
-
 		lastLat: undefined,
 		lastLon: undefined,
 		nominatim: undefined,
@@ -440,7 +428,6 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		},
 
 		jsonCallback: function (data) {
-
 			var elements = data.elements;
 			if (!elements) {
 				alert ('Missing "elements" in overpassXML json data.');
@@ -569,6 +556,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 <script type="text/javascript" src="opening_hours.js/js/i18next-1.6.3.min.js"></script>
 <script type="text/javascript" src="opening_hours.js/js/i18n-resources.js"></script>
 <script type="text/javascript" src="opening_hours.js/js/opening_hours_table.js"></script>
+<script type="text/javascript" src="opening_hours.js/js/helpers.js"></script>
 <style type="text/css">
 .olMap {
 	color: black;

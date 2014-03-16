@@ -245,7 +245,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 					}
 					val=res.join('; ');
 				}
-				rows.push ('<tr><td>'+this.html(tag)+':</td><td>'+val+'</td></tr>');
+				rows.push ('<tr><td>'+this.html(tag)+'</td><td>'+val+'</td></tr>');
 			}
 
 			if (rows.length>=1) text += '<table>'+rows.join('\n')+'</table>\n';

@@ -8,6 +8,19 @@ This map shows the opening_hours as nicely readable time table.
 
 [online]: http://openingh.openstreetmap.de
 
+## Install
+
+Just clone the repository:
+
+```
+git clone --recursive https://github.com/ypid/opening_hours_map.git
+```
+
+and install it’s dependencies (execute inside the repository):
+```
+make installDependencies
+```
+
 # Dependencies
 * This map uses the [opening_hours.js][oh-lib] library.
 

@@ -192,6 +192,9 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 	createHtmlFromData: function (data) {
 		var h_icon = '<img src="' + this.getIconUrl(data) + '" alt=""/>';
 		var h_name = this.html(data.name||data.ref||data.operator||data.shop||data.amenity||data.craft||data.id);
+		if (typeof data.cuisine == 'string') {
+			h_name += ' (cuisine: ' + data.cuisine + ')';
+		}
 
 		var text = '<h3>'+h_icon+'&#160;'+h_name+'</h3>\n';
 		text += '<div class="v">'+this.html(data._oh_value)+'</div>';
@@ -231,7 +234,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 			for (var tag in data) {
 				if (data[tag] == '') continue;
 				switch (tag) {
-				case 'id': case '_id': case 'lat': case 'lon': case 'name': case 'created_by':
+				case 'id': case '_id': case 'lat': case 'lon': case 'created_by':
 				case '_oh_value': case '_oh_state': case '_oh_object': case '_it_object':
 					continue;
 				}

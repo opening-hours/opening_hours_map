@@ -170,6 +170,8 @@ map.addLayer (new OpenLayers.Layer.OSM.CycleMap('CycleMap'));
 
 map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like values (opening_hours, lit, …)', {
 
+	fixBrokenJsonp: true,
+
 	//------------------------------------------------------------
 	//	blocksize=0 deaktiviert das Cachen von Markern.
 	//------------------------------------------------------------

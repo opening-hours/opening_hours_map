@@ -154,7 +154,7 @@ map.addControl (new OpenLayers.Control.Navigation());
 map.addControl (new OpenLayers.Control.PanZoomBar());
 map.addControl (new OpenLayers.Control.Permalink());
 map.addControl (new OpenLayers.Control.ZoomStatus(
-{html: i18n.t('texts.low zoom level') }));
+	{html: i18n.t('texts.low zoom level') }));
 map.addControl(new OpenLayers.Control.Attribution());
 
 //----------------------------------------------------------------------------
@@ -361,7 +361,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 				// if (value) kvlist.push ('v="' + this.html(value) + '"');
 				kvlist.push ("/>");
 				components.push('<query type="node">' + bboxQuery + kvlist.join(' ') + '</query>');
-				components.push('<query type="way">'  + bboxQuery + kvlist.join(' ') + '</query>');
+				// components.push('<query type="way">'  + bboxQuery + kvlist.join(' ') + '</query>');
 			}
 
 			var xml = '<osm-script output="json"><union>' + components.join('') + '</union><print/></osm-script>';

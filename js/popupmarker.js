@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//	$Id: popupmarker.js,v 1.115 2013/05/07 22:24:00 wolf Exp wolf $
+//	$Id: popupmarker.js,v 1.125 2014/06/28 10:14:02 wolf Exp wolf $
 //------------------------------------------------------------------------------
 //	Erklaerung:	http://www.netzwolf.info/kartografie/openlayers/#csv
 //------------------------------------------------------------------------------
@@ -8,53 +8,28 @@
 //------------------------------------------------------------------------------
 //
 //	$Log: popupmarker.js,v $
-//	Revision 1.115  2013/05/07 22:24:00  wolf
-//	+ data['~in']
-//	+ iD-Editor
+//	Revision 1.125  2014/06/28 10:14:02  wolf
+//	+ fixBrokenJsonp
 //
-//	Revision 1.114  2013/04/26 21:09:42  wolf
-//	+ triggerEvent(popupopen, popupclose)
+//	Revision 1.124  2014/02/19 10:53:34  wolf
+//	* cleanup
 //
-//	Revision 1.113  2013/04/26 19:46:14  wolf
-//	+ selectId
+//	Revision 1.123  2014/02/14 15:05:06  wolf
+//	+ formatValue: ~user, ~in
 //
-//	Revision 1.112  2013/04/11 19:18:47  wolf
-//	+ getWikipediaUrl
-//	+ parseURL
+//	Revision 1.122  2014/02/12 20:26:30  wolf
+//	* map -> this.map
 //
-//	Revision 1.110  2013/04/06 16:46:41  wolf
-//	+ closeKeyCode
-//	+ formatValue: interwikiLink
+//	Revision 1.121  2014/02/10 13:24:50  wolf
+//	+ clickout
 //
-//	Revision 1.108  2013/03/08 11:46:07  wolf
-//	+ shrinkUrl
+//	Revision 1.120  2013/12/06 08:01:22  wolf
+//	+ clusterMinZoom
 //
-//	Revision 1.105  2013/01/20 14:20:50  wolf
-//	+ josm:load_object
-//
-//	Revision 1.104  2013/01/19 22:14:43  wolf
-//	+ "www." -> link
-//
-//	Revision 1.102  2013/01/12 14:56:47  wolf
-//	+ wikipedia-Links
-//
-//	Revision 1.101  2013/01/12 14:19:41  wolf
-//	+ timer-reload
-//	+ nameless columns
-//
-//	Revision 1.100  2012/11/07 13:35:04  wolf
-//	* Bugfix: map->this.map
-//
-//	Revision 1.99  2012/05/21 08:50:36  wolf
-//	+ jsonpRequest()
-//
-//	Revision 1.98  2012/05/04 23:06:49  wolf
-//	+ createTemporaryMarker:
-//
-//	Revision 1.97  2012/03/31 17:09:28  wolf
-//	* Anpassung an pinch-Handling (Ipad).
-//	* Ergaenzungen zum POI-Editor
-//	* String-Cleanup
+//	Revision 1.119  2013/11/25 23:03:44  wolf
+//	+ undefinedMarkerIconUrl
+//	+ undefinedMarkerIconSize
+//	+ highlight members
 //
 //	[...]
 //
@@ -92,6 +67,7 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 	lastZoom: -1,
 	blockSize: 0.1,
 	clusterSize: 0,
+	clusterMinZoom: 0,
 	clusterSort: null,
 	clusterLimit: 10,
 	zindex: null,
@@ -103,6 +79,7 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 	closeOnClick: false,		// close by click into popup
 	closeKeyCode: false,		// close popup by key with this keyCode
 	clickDistance: 0,		// open by click near to marker
+	clickout: false,		// close by click into map
 	fieldTitles: {},
 	fieldTypes: {},
 	fieldValues: {},
@@ -113,13 +90,18 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 	locateId: null,
 	reloadTimer: null,
 	reloadInterval: null,
-
 	labelEdit: 'Bearbeiten',
 	labelDelete: 'L' + String.fromCharCode(246) + 'schen',
 	labelConfirmDelete: 'Marker permanent l' + String.fromCharCode(246) + 'schen?',
 	labelLocate: 'Verschieben',
+	textAllItems: 'Alle ${count} Eintr' + String.fromCharCode(228) + 'ge',
+	textFirstItems: 'Die ersten ${count} von ${all} Eintr' + String.fromCharCode(228) + 'gen',
 	locateMarker: null,
 	selectId: null,
+	classByType: null,
+	undefinedMarkerIconUrl: null,
+	undefinedMarkerIconScale: 0.5,
+	fixBrokenJsonp: false,
 
 	//----------------------------------------------------------------------
 	//	Init
@@ -164,7 +146,8 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 
 		if (this.location) { this.request(this.location); }
 
-		if (this.enableCreate!==false || this.clickDistance>0 || this.enableLocate) {
+		if (this.enableCreate!==false || this.clickDistance>0 ||
+				this.enableLocate || this.clickout) {
 			this.clickHandler = new OpenLayers.Handler.Click (this,
 				{'click': this.click}, {'single': true});
 			this.clickHandler.activate();
@@ -202,6 +185,11 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 
 		if (!this.visibility) { return null; }
 
+		if (this.clickout && this.currentPopup) {
+
+			this.destroyPopup();
+		}
+
 		if (this.clickDistance>0 && !ev.ctrlKey && !ev.shiftKey && ev.xy && this.markers) {
 
 			if (this.currentPopup) {
@@ -235,7 +223,7 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 		if (!data) { data={}; }
 
 		++this.nextId;
-		
+
 		data.lon = lonlat.lon;
 		data.lat = lonlat.lat;
 		data.id  = -this.nextId;
@@ -301,13 +289,14 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 		var closureCallback = callback;
 		var closureLayer = this;
 
-		window.callbacks[requestId] = function (data) {
+		var boundFunction = function (data) {
 
 			//-------------------------------------------------
 			//	cleanup callback structure
 			//-------------------------------------------------
 
 			delete window.callbacks[requestId];
+			if (this.fixBrokenJsonp) delete window['callbacks'+requestId];
 
 			//-------------------------------------------------
 			//	remove script node
@@ -331,10 +320,19 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 			closureCallback.apply (closureScope, [data]);
 		};
 
+		if (this.fixBrokenJsonp) {
+
+			window['callbacks'+requestId] = boundFunction;
+		} else {
+			window.callbacks[requestId] = boundFuction;
+		}
+
+		var fname = this.fixBrokenJsonp ?
+			'callbacks'+requestId : 'window.callbacks.'+requestId;
 
 		var scriptNode = document.createElement ('script');
 		scriptNode.id  = requestId;
-		scriptNode.src = url.replace (/#/, "window.callbacks." + requestId);
+		scriptNode.src = url.replace (/#/, fname);
 
 		closureLayer.events.triggerEvent('loadstart');
 
@@ -518,7 +516,7 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 			}
 		}
 
-		if (!map.getCenter()) { this.map.zoomToMaxExtent(); }
+		if (!this.map.getCenter()) { this.map.zoomToMaxExtent(); }
 		this.events.triggerEvent('loadend');
 		this.loadingUrl = null;
 		if (this.visibility) { this.loadNext(); }
@@ -541,7 +539,7 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 			'phase': 'request failed (' +
 				request.status + ': ' + request.statusText + ')'
 		}));
-		if (!map.getCenter()) { this.map.zoomToMaxExtent(); }
+		if (!this.map.getCenter()) { this.map.zoomToMaxExtent(); }
 		this.events.triggerEvent('loadend');
 		this.loadingUrl = null;
 		this.loadNext();
@@ -594,28 +592,80 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 		marker.icon.imageDiv.firstChild.className='olPopupMarker';
 		marker.icon.imageDiv.className='olPopupMarker';
 
-		if (data['~in']) {
+		if (data['~group']) {
 
-			var inClass = data['~in'];
-
-			marker.icon.imageDiv.className =
-				marker.icon.imageDiv.className + ' ' + inClass;
-
-			if ((data.id+'').substr(0,1)=='r') {
-
-				var mapDiv= this.map.div;
-
-				marker.icon.imageDiv.onmouseover = function() {
-					OpenLayers.Element.addClass (mapDiv, inClass);
-				};
-				marker.icon.imageDiv.onmouseout = function() {
-					OpenLayers.Element.removeClass (mapDiv, inClass);
-				};
-			}
+			marker.icon.imageDiv;
+			OpenLayers.Element.addClass (marker.icon.imageDiv, data['~group']);
 		}
+
+		//---------------------------------------------------------
+		//	link
+		//---------------------------------------------------------
 
 		marker.layer=this;
 		marker.data =data;
+
+		//---------------------------------------------------------
+		//	handle site relations
+		//---------------------------------------------------------
+
+		if (this.classByType && data.type && this.classByType[data.type] && data['~members']) {
+
+			var groupMemberIds = data['~members'].split(',');
+			var groupClass     = this.classByType[data.type];
+			var groupLayer     = this;
+
+			marker.icon.imageDiv.onmouseover = function() {
+
+				var replacementIcon = null;
+
+				for (var i in groupMemberIds) {
+
+					var memberId = groupMemberIds[i];
+					var memberMarker = groupLayer.getMarkerByDataId(memberId);
+
+					if (!memberMarker) continue;
+					OpenLayers.Element.addClass (memberMarker.icon.imageDiv, groupClass);
+
+					if (memberMarker.icon.url!=marker.layer.undefinedMarkerIconUrl) continue;
+
+					//---------------------------------
+					//	replace "unknown" icons
+					//	HACK specifically for histmap
+					//---------------------------------
+
+					memberMarker.icon.url = marker.layer.createIconUrlFromParams(
+						iconParamsFromData(marker.data, false),
+						hasImageFromData(memberMarker.data));
+
+					memberMarker.icon.size = new OpenLayers.Size(
+						marker.layer.undefinedMarkerIconScale*marker.icon.size.w,
+						marker.layer.undefinedMarkerIconScale*marker.icon.size.h);
+
+					memberMarker.icon.offset = new OpenLayers.Pixel(
+						marker.layer.undefinedMarkerIconScale*marker.icon.offset.w,
+						marker.layer.undefinedMarkerIconScale*marker.icon.offset.h);
+
+					memberMarker.icon.calculateOffset = marker.icon.calculateOffset;
+
+					memberMarker.icon.draw();
+				}
+			};
+
+			marker.icon.imageDiv.onmouseout = function(evt) {
+
+				if (evt.shiftKey || evt.ctrlKey) return;
+
+				for (var i in groupMemberIds) {
+
+					var memberId = groupMemberIds[i];
+					var marker = groupLayer.getMarkerByDataId(memberId);
+
+					if (!marker) continue;
+					OpenLayers.Element.removeClass (marker.icon.imageDiv, groupClass);
+				}
+			};
+		}
 
 		//---------------------------------------------------------
 		//	tooltip
@@ -765,11 +815,13 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 	//	markerClick
 	//----------------------------------------------------------------------
 
-	markerClick: function (ev) {
+	markerClick: function (evt) {
+
+		if (evt) OpenLayers.Event.stop(evt);
 
 		var layer = this.layer;
 
-		if (ev.shiftKey && !ev.ctrlKey || layer.locateMarker) {
+		if (evt.shiftKey && !evt.ctrlKey || layer.locateMarker) {
 			return false;
 		}
 
@@ -779,7 +831,7 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 		} else if (layer.currentMarker==this) {
 			layer.destroyPopup();
 			layer.currentMarker=null;
-		} else if (!ev.shiftKey || !ev.ctrlKey) {
+		} else if (!evt.shiftKey || !evt.ctrlKey) {
 			layer.createPopup(this);
 			layer.currentMarker=this;
 		//} else if (layer.enableUpdate) {
@@ -855,9 +907,12 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 		//--------------------------------------------------------------
 
 		var cluster = [];
-		if (this.clusterSize>0) {
+		if (this.clusterSize>0 && this.map.zoom>=this.clusterMinZoom) {
+
 			var limit = this.clusterSize/Math.pow(2,this.map.zoom)*156543;
+
 			for (var i=0; i<this.markers.length; i++) {
+
 				var member=this.markers[i];
 				if (Math.abs(marker.lonlat.lat-member.lonlat.lat)>limit) {
 					continue;
@@ -1574,7 +1629,7 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 
 	formatValue: function (text, tag) {
 
-		if (!text.match(/http:/)) {
+		if (!(text+'').match(/http:/)) {
 
 			if (tag=='wikipedia') {
 				var lang_lemma = text.match(/^(\w\w):(.+)$/);
@@ -1597,6 +1652,11 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 						'">' + html_lemma + '</a>';
 				}
 
+			} else if (tag=='wikidata' && (text+'').match(/^(Q\d+)$/)) {
+
+				return '<a target="_blank" href="https://www.wikidata.org/wiki/' +
+					text + '">' + text + '</a>';
+
 			} else if (tag.match(/^(image|image:\w+)$/)) {
 
 				var interwiki = text.match (/^(File:.*\S)/);
@@ -1607,6 +1667,24 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 						html_interwiki.replace(/\040/g,'_') + '">' +
 							html_interwiki + '</a>';
 				}
+
+			} else if (tag=='~user') {
+
+				return '<a target="_blank" href="http://www.openstreetmap.org/user/' +
+					text + '">' + text + '</a>';
+
+			} else if (tag=='~in') {
+
+				var result = [];
+				var rels = text.split(/[,\s]+/);
+				for (var r in rels) {
+
+					var rel=rels[r];
+					var id=rel.substr(1);
+					result.push (
+	'<a target="_blank" href="http://www.openstreetmap.org/relation/' + id + '">' + rel + '</a>');
+				}
+				return result.join(', ');
 			}
 		}
 
@@ -1805,18 +1883,28 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 				}
 			}
 		}
+
 		if (nItems>limit) {
+
 			if (limit!=1) {
-				items.unshift('Die ersten '+items.length+
-					' von '+nItems+ ' Eintr&#228;gen:');
+
+				items.unshift(OpenLayers.String.format(this.textFirstItems,
+					{count: items.length, all: nItems})+':');
 			}
+
 		} else if (items.length) {
-			if (limit!=1) { items.unshift('Alle '+items.length+
-				' Eintr&#228;ge:');
+
+			if (limit!=1) {
+
+				items.unshift(OpenLayers.String.format(this.textAllItems,
+					{count: items.length})+':');
 			}
+
 		} else {
+
 			items=clusters;
 		}
+
 		return items.join('<hr/>\n');
 	},
 
@@ -1930,5 +2018,5 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 });
 
 //--------------------------------------------------------------------------------
-//	$Id: popupmarker.js,v 1.115 2013/05/07 22:24:00 wolf Exp wolf $
+//	$Id: popupmarker.js,v 1.125 2014/06/28 10:14:02 wolf Exp wolf $
 //--------------------------------------------------------------------------------

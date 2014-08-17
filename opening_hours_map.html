@@ -335,40 +335,44 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		reloadPOIs: function () {
 			if (this.updateKeyValues) this.updateKeyValues();
 
-			var xml = this.overpassXML (this.keyValues);
-			var url = 'http://overpass-api.de/api/interpreter?jsonp=#&data=' + encodeURIComponent(xml);
-			this.jsonpRequest (url, this, this.jsonCallback);
+			var xml = this.overpassQL(this.keyValues);
+			var url = 'http://overpass-api.de/api/interpreter?&data=' + encodeURIComponent(xml);
+
+			var self = this;
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', url, true);      // true makes this call asynchronous
+			xhr.onreadystatechange = function () {    // need eventhandler since our call is async
+				if ( xhr.readyState == 4 && xhr.status == 200 ) {  // check for success
+					self.jsonCallback(JSON.parse(xhr.responseText));
+				}
+			};
+			xhr.send(null);
 		},
 
 		//------------------------------------------------------------
 		//	Baue aus den keyValues eine overpass-Anfrage.
 		//------------------------------------------------------------
 
-		overpassXML: function (keyvalues) {
+		overpassQL: function (keyvalues) {
 			if (!(keyvalues instanceof Array)) keyvalues = [keyvalues];
 
 			var bbox = this.map.getExtent().
 				transform(this.map.getProjectionObject(),this.map.displayProjection);
 
 			var bboxQuery = OpenLayers.String.format (
-				'<bbox-query s="${bottom}" n="${top}" w="${left}" e="${right}"/>',
+				'[bbox:${bottom},${left},${top},${right}]',
 				bbox);
 
 			var components = [];
 			for (var i in keyvalues) {
 				var key = keyvalues[i];
-				var kvlist = [];
-				kvlist.push ("<has-kv");
-				if (key) kvlist.push ('k="' + this.html(key) + '"');
-				// if (value) kvlist.push ('v="' + this.html(value) + '"');
-				kvlist.push ("/>");
-				components.push('<query type="node">' + bboxQuery + kvlist.join(' ') + '</query>');
-				// components.push('<query type="way">'  + bboxQuery + kvlist.join(' ') + '</query>');
+				components.push("node['" + key + "'];");
+				components.push("way['" + key + "'];");
 			}
 
-			var xml = '<osm-script output="json"><union>' + components.join('') + '</union><print/></osm-script>';
+			var OverpassQL = '[out:json][timeout:3]' + bboxQuery + ';(' + components.join('') + ');out meta center 1000;';
 
-			return xml;
+			return OverpassQL;
 		},
 
 		evaluateOH: function (data) {
@@ -423,21 +427,35 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		nominatim: undefined,
 		url_lang: 'de',
 
-		//------------------------------------------------------------
-		//	Callback-Funktion für JSONP:
-		//	Löscht die bestehenden POIs und trägt die neuen ein.
-		//------------------------------------------------------------
-
 		createMarkerFromData: function(elements) {
 		},
 
 		jsonCallback: function (data) {
 			var elements = data.elements;
 			if (!elements) {
-				alert ('Missing "elements" in overpassXML json data.');
+				alert ('Missing "elements" in overpassQL json data.');
 				return;
 			}
-			this.erase (true);
+			this.erase(true);
+
+			for (var i in elements) {
+				var element = elements[i];
+				var data = element.tags;
+				if (!data) data = {};
+				if (element.id) {
+					data.id = (element.type ? element.type.substr(0,1) : '') + element.id;
+					data._id = element.id;
+				}
+				data._type = element.type;
+				if (data._type == 'way') {
+					data.lat = element.center.lat;
+					data.lon = element.center.lon;
+				} else {
+					data.lat = element.lat;
+					data.lon = element.lon;
+				}
+				this.createMarker (data);
+			}
 
 			var nominatim;
 			if (typeof elements[0] != 'undefined' && (typeof this.lastLat == 'undefined'
@@ -473,21 +491,6 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 				this.lastLat = elements[0].lat;
 				this.lastLon = elements[0].lon;
 			}
-
-			for (var i in elements) {
-				var element = elements[i];
-				var data = element.tags;
-				if (!data) data = {};
-				if (element.id) {
-					data.id = (element.type ? element.type.substr(0,1) : '') + element.id;
-					data._id = element.id;
-				}
-				if (element.type) data._type = element.type;
-				data.lat = element.lat;
-				data.lon = element.lon;
-				this.createMarker (data);
-			}
-
 		},
 
 		//------------------------------------------------------------

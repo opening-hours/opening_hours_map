@@ -198,7 +198,9 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 				var prettified = data._oh_object.prettifyValue();
 
 				if (data._oh_value != prettified)
-					text += '<br/>' + i18n.t('texts.prettified value') + ': <div class="v">'+prettified+'</div>';
+					text += '<br/>' + i18n.t('texts.prettified value', {
+							copyFunc: 'javascript:Evaluate(null, null, \'' + data._oh_value + '\')',
+						}) + ': <div class="v">'+prettified+'</div>';
 
 				var warnings = data._oh_object.getWarnings();
 				if (warnings.length > 0)

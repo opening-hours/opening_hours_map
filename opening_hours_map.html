@@ -27,10 +27,10 @@ var permalinkParams={};
 var permalinkObject;
 
 function Evaluate(number, reset, value) {
-	window.open('http://openingh.openstreetmap.de/evaluation_tool/' + '?EXP='+encodeURIComponent(value),'_blank');
+	window.open('http://openingh.openstreetmap.de/evaluation_tool/' + '?EXP='+encodeURIComponent(value), '_blank');
 }
 
-// from https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
+// From https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
 function editPopupContent(content, lat, lon, type, id, oh_value) {
 	var short_type = type.substr(0, 1);
 	// add some links to the bottom of a popup
@@ -165,12 +165,10 @@ map.addLayer (new OpenLayers.Layer.OSM.Mapnik('Mapnik'));
 map.addLayer (new OpenLayers.Layer.OSM.CycleMap('CycleMap'));
 
 //----------------------------------------------------------------------------
-//**	JSONP-POI-Layer
+//**	opening_hours-POI-Layer
 //----------------------------------------------------------------------------
 
 map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like values (opening_hours, lit, …)', {
-
-	fixBrokenJsonp: true,
 
 	//------------------------------------------------------------
 	//	blocksize=0 deaktiviert das Cachen von Markern.

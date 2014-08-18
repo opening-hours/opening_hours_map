@@ -23,7 +23,7 @@ if (!document.onLoadFunctions) {
 
 var poi_layer;
 
-var permalinkParams={};
+var permalinkParams = {};
 var permalinkObject;
 
 function Evaluate(number, reset, value) {
@@ -71,16 +71,24 @@ var tags_to_mode = {
 document.onLoadFunctions.push ( function () {
 
 	window.useUserKey = function (key) {
-		if (typeof tags_to_mode[key] != 'object') { // add new key
-			var select = document.getElementById('tagselector_input');
+		if (typeof tags_to_mode[key] != 'object') { // Add new key to select.
+			var select = document.getElementById('tag_selector_input');
 			tags_to_mode[key] = [ OHMode, select.options.length ];
 			select.options[select.options.length] = new Option(key, select.options.length);
 		}
-		document.getElementById('tagselector_input').selectedIndex = tags_to_mode[key][1];
+		document.getElementById('tag_selector_input').selectedIndex = tags_to_mode[key][1];
 	};
 
 	window.keyChanged = function() {
 		poi_layer.reloadPOIs();
+		permalinkObject.updateLink();
+	};
+
+	permalinkParams.filter = OpenLayers.Util.getParameters().filter || 'none';
+
+	window.applyNewFilter = function (myRadio) {
+		permalinkParams.filter = myRadio.value;
+		poi_layer.redrawPOIs();
 		permalinkObject.updateLink();
 	};
 
@@ -109,7 +117,7 @@ document.onLoadFunctions.push ( function () {
 	}
 
 	if (typeof tags_to_mode[OSM_tags[0]] != 'undefined') {
-		document.getElementById('tagselector_input').selectedIndex = tags_to_mode[OSM_tags[0]][1];
+		document.getElementById('tag_selector_input').selectedIndex = tags_to_mode[OSM_tags[0]][1];
 	} else {
 		useUserKey(OSM_tags[0]);
 	}
@@ -330,6 +338,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		//	Muss nach Ändern von keyValues augerufen werden.
 		//------------------------------------------------------------
 
+
 		reloadPOIs: function () {
 			if (this.updateKeyValues) this.updateKeyValues();
 
@@ -341,10 +350,15 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 			xhr.open('GET', url, true);      // true makes this call asynchronous
 			xhr.onreadystatechange = function () {    // need eventhandler since our call is async
 				if ( xhr.readyState == 4 && xhr.status == 200 ) {  // check for success
-					self.jsonCallback(JSON.parse(xhr.responseText));
+					self.poi_data = JSON.parse(xhr.responseText);
+					self.redrawPOIs();
 				}
 			};
 			xhr.send(null);
+		},
+
+		redrawPOIs: function() {
+			this.jsonCallback(this.poi_data);
 		},
 
 		//------------------------------------------------------------
@@ -382,8 +396,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 							&& typeof tags_to_mode[OSM_tags[i]][2] == 'object'
 							&& typeof tags_to_mode[OSM_tags[i]][2].map == 'object') {
 								var map = tags_to_mode[OSM_tags[i]][2].map;
-								console.log("value", map[data._oh_value], data._oh_value);
-								console.log(JSON.stringify(map, null, '\t'));
+								console.log('Using value: "' + map[data._oh_value] + '" instead of original value: "' + data._oh_value + '".');
 								if (typeof map[data._oh_value] == 'string')
 									data._oh_value = map[data._oh_value];
 						}
@@ -424,6 +437,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		lastLon: undefined,
 		nominatim: undefined,
 		url_lang: 'de',
+		poi_data: undefined,
 
 		createMarkerFromData: function(elements) {
 		},
@@ -496,7 +510,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		//------------------------------------------------------------
 		updateKeyValues: function () {
 			for (var key in tags_to_mode) {
-				if (tags_to_mode[key][1] == document.getElementById('tagselector_input').selectedIndex) {
+				if (tags_to_mode[key][1] == document.getElementById('tag_selector_input').selectedIndex) {
 					this.keyValues = [ key ];
 					if (typeof tags_to_mode[key] != 'undefined')
 						OHMode = tags_to_mode[key][0];
@@ -507,28 +521,40 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 			}
 		},
 
-		filter: OpenLayers.Util.getParameters().filter=='error' ? function (data) {
-				return this.evaluateOH(data) == 'error' || data._oh_object.getWarnings().length > 0;
-			} : OpenLayers.Util.getParameters().filter=='errorOnly' ? function (data) {
-				return this.evaluateOH(data) == 'error';
-			} : OpenLayers.Util.getParameters().filter=='warnOnly' ? function (data) {
-				return this.evaluateOH(data) != 'error' && data._oh_object.getWarnings().length > 0;
-			} : OpenLayers.Util.getParameters().filter=='open' ? function (data) {
-				if (this.evaluateOH(data) == 'error')
-					return false;
-				else
-					return data._it_object.getState();
-			} : OpenLayers.Util.getParameters().filter=='unknown' ? function (data) {
-				if (this.evaluateOH(data) == 'error')
-					return false;
-				else
-					return data._it_object.getUnknown();
-			} : OpenLayers.Util.getParameters().filter=='OpenOrUnknown' ? function (data) {
-				if (this.evaluateOH(data) == 'error')
-					return false;
-				else
-					return data._it_object.getState() || data._it_object.getUnknown();
-			} : null,
+		filter: function(data) {
+			switch (permalinkParams.filter) {
+				case 'error':
+					return this.evaluateOH(data) == 'error' || data._oh_object.getWarnings().length > 0;
+					break;
+				case 'errorOnly':
+					return this.evaluateOH(data) == 'error';
+					break;
+				case 'warnOnly':
+					return this.evaluateOH(data) != 'error' && data._oh_object.getWarnings().length > 0;
+					break;
+				case 'open':
+					if (this.evaluateOH(data) == 'error')
+						return false;
+					else
+						return data._it_object.getState();
+					break;
+				case 'unknown':
+					if (this.evaluateOH(data) == 'error')
+						return false;
+					else
+						return data._it_object.getUnknown();
+					break;
+				case 'openOrUnknown':
+					if (this.evaluateOH(data) == 'error')
+						return false;
+					else
+						return data._it_object.getState() || data._it_object.getUnknown();
+					break;
+				case 'none':
+				default:
+					return true;
+			}
+		},
 
 		minZoom: 11,
 		blockSize: 0,	// no cache
@@ -547,7 +573,7 @@ map.addLayer (poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like 
 		transform(new OpenLayers.Projection('EPSG:4326'), map.getProjectionObject()));
 	}
 
-	document.getElementById('tagselector_input').onchange = keyChanged;
+	document.getElementById('tag_selector_input').onchange = keyChanged;
 
 });
 /*]]>*/</script>
@@ -733,11 +759,11 @@ function submitenter(myfield,e) {
 }
 </script>
 
-<div id="tagselector">
+<div id="tag_selector">
 	<script type="text/javascript">
 		document.write('<strong>' + i18n.t('texts.config POIs') + '</strong>:');
 	</script>
-	<select id="tagselector_input" name="tagselector_input">
+	<select id="tag_selector_input" name="tag_selector_input">
 		<script type="text/javascript">
 			for (var tag in tags_to_mode) {
 				document.write('<option value="' + tags_to_mode[tag][1] + '">' + tag + '</option>');
@@ -753,8 +779,7 @@ function submitenter(myfield,e) {
 <!-- <li>Graublau: <q>geschlossen, öffnet aber heute noch</q>,</li> -->
 <!-- <li>Grau: <q>geschlossen, öffnet heute nicht mehr</q>,</li> -->
 <script type="text/javascript">
-	document.write('<p>');
-	document.write(i18n.t('texts.map is showing', { mapUrl: html_url, wikiUrl: wiki_url }));
+	document.write(i18n.t('texts.map is showing', { wikiUrl: wiki_url }));
 	document.write('<ul>');
 	document.write('<li>' + i18n.t('words.green')  + ': ' + i18n.t('texts.open now') + '</li>');
 	document.write('<li>' + i18n.t('words.yellow') + ': ' + i18n.t('texts.unknown now') + '</li>');
@@ -762,17 +787,26 @@ function submitenter(myfield,e) {
 	document.write('<li>' + i18n.t('words.violet')    + ': ' + i18n.t('texts.error') + '</li>');
 	document.write('</ul>');
 	document.write(i18n.t('texts.warning', { sign: '<q>W</q>' }));
-	document.write('</p><p>');
+</script>
+</p>
+
+<div id="filter_selector"><p>
+<script type="text/javascript">
 	document.write(i18n.t('texts.map filter'));
-	document.write('<ul>');
-	document.write('<li>' + '<a href="' + html_url + '?filter=error">' + i18n.t('texts.warn error') + '</a></li>');
-	document.write('<li>' + '<a href="' + html_url + '?filter=warnOnly">' + i18n.t('texts.warnings only') + '</a></li>');
-	document.write('<li>' + '<a href="' + html_url + '?filter=errorOnly">' + i18n.t('texts.error only') + '</a></li>');
-	document.write('<li>' + '<a href="' + html_url + '?filter=open">' + i18n.t('texts.facilitiy which is open now') + '</a></li>');
-	document.write('<li>' + '<a href="' + html_url + '?filter=closed">' + i18n.t('texts.facilitiy which is closed now') + '</a></li>');
-	document.write('<li>' + '<a href="' + html_url + '?filter=unknown">' + i18n.t('texts.facilitiy which is unknown now') + '</a></li>');
-	document.write('<li>' + '<a href="' + html_url + '?filter=OpenOrUnknown">' + i18n.t('texts.facilitiy which is open/unknown now') + '</a></li>');
-	document.write('</ul>');
+	document.write('<form name="filter_selecotr_form">');
+	var showFilterOptions = ['none', 'error', 'warnOnly', 'errorOnly', 'open', 'unknown', 'closed', 'openOrUnknown'];
+	for (var i = 0; i < showFilterOptions.length; i++) {
+		var filter_id = showFilterOptions[i];
+		document.write('<input type="radio" name="filter"'
+				+ ' value="' + filter_id + '"'
+				+ (filter_id === 'none' ? ' checked' : '')
+				+ ' onclick="applyNewFilter(this)">' + i18n.t('texts.filter.' + filter_id) + '</input><br>');
+	}
+	document.write('</form>');
+</script>
+</p></div>
+
+<script type="text/javascript">
 	document.write('</p><p>');
 	document.write(i18n.t('texts.data source', { APIaTag: '<a href="http://overpass-api.de/">Overpass API</a>', OSMaTag: '<a href="http://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>' }) + '<br />');
 	document.write(i18n.t('texts.this website', { url: repo_url, hoster: 'GitHub' }));

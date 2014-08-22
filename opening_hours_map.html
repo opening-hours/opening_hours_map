@@ -175,9 +175,12 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 
 	createHtmlFromData: function (data) {
 		var h_icon = '<img src="' + this.getIconUrl(data) + '" alt=""/>';
-		var h_name = this.html(data.name||data.ref||data.operator||data.shop||data.amenity||data.craft||data.id);
+		var h_name = this.html(data.name||data.ref||data.barrier||data.operator||data.shop||data.amenity||data.craft||data.id);
 		if (typeof data.cuisine == 'string') {
 			h_name += ' (cuisine: ' + data.cuisine + ')';
+		}
+		if (typeof data.barrier == 'string') {
+			h_name = 'barrier: ' + h_name;
 		}
 
 		var text = '<h3>'+h_icon+'&#160;'+h_name+'</h3>\n';

@@ -34,7 +34,7 @@ The map uses OpenLayers to show a base map from OpenStreetMap. An additional opt
 
 ## Dependencies
 
-* This map is build with OpenLayers [OpenLayers][ol-lib].
+* This map is build with [OpenLayers][ol-lib].
 * The opening_hours evolution is handled by the [opening_hours.js][oh-lib] library.
 
 [ol-lib]: http://openlayers.org/

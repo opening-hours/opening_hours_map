@@ -525,7 +525,7 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 					if (this.evaluateOH(data) == 'error')
 						return false;
 					else
-						return !data._it_object.getState();
+						return !data._it_object.getState() && !data._it_object.getUnknown();
 					break;
 				case 'openOrUnknown':
 					if (this.evaluateOH(data) == 'error')

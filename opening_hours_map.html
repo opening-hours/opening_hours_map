@@ -355,7 +355,7 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 				components.push("way['" + key + "'];");
 			}
 
-			var OverpassQL = '[out:json][timeout:3]' + bboxQuery + ';(' + components.join('') + ');out meta center 1000;';
+			var OverpassQL = '[out:json][timeout:3]' + bboxQuery + ';(' + components.join('') + ');out body center 1000;';
 
 			return OverpassQL;
 		},

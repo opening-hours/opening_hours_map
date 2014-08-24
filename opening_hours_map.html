@@ -634,10 +634,10 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 	var showFilterOptions = ['none', 'error', 'warnOnly', 'errorOnly', 'open', 'unknown', 'closed', 'openOrUnknown'];
 	for (var i = 0; i < showFilterOptions.length; i++) {
 		var filter_id = showFilterOptions[i];
-		document.write('<input type="radio" name="filter"'
+		document.write('<label><input type="radio" name="filter"'
 				+ ' value="' + filter_id + '"'
 				+ ' id="filter_form_' + filter_id + '"'
-				+ ' onclick="applyNewFilter(this)">' + i18n.t('texts.filter.' + filter_id) + '</input><br>');
+				+ ' onclick="applyNewFilter(this)">' + i18n.t('texts.filter.' + filter_id) + '</input></label><br>');
 	}
 	document.write('</form>');
 	document.getElementById('filter_form_none').checked = true;

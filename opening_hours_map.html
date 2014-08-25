@@ -646,7 +646,11 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 
 <script type="text/javascript">
 	document.write('</p><p>');
-	document.write(i18n.t('texts.data source', { APIaTag: '<a href="http://overpass-api.de/">Overpass API</a>', OSMaTag: '<a href="http://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>' }) + '<br />');
+	document.write(i18n.t('texts.data source', {
+		APIaTag:      '<a href="http://overpass-api.de/">Overpass API</a>',
+		OSMaTag:      '<a href="http://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
+		OSMStartaTag: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>',
+		}) + '<br />');
 	document.write(i18n.t('texts.this website', { url: repo_url, hoster: 'GitHub' }));
 	document.write('</p>');
 </script>

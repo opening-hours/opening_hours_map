@@ -579,6 +579,8 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 
 <body>
 <div id="map"></div>
+<iframe style="visibility:hidden;display:none" name='hiddenframe'></iframe>
+<!-- This hidden iframe is used to communicate with JOSM. See opening_hours.js/js/helpers.js -->
 
 <script type="text/javascript">
 	document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');

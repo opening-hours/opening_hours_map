@@ -122,72 +122,73 @@ document.onLoadFunctions.push ( function () {
 		useUserKey(OSM_tags[0]);
 	}
 
-/* {{{ OpenLayers */
-//----------------------------------------------------------------------------
-//	Karte - der Name ('map') muss mit der id des <div> uebereinstimmen.
-//----------------------------------------------------------------------------
-map = new OpenLayers.Map ('map', {controls:[]});
+	/* {{{ OpenLayers */
+	//----------------------------------------------------------------------------
+	//	Karte - der Name ('map') muss mit der id des <div> uebereinstimmen.
+	//----------------------------------------------------------------------------
+	map = new OpenLayers.Map ('map', {controls:[]});
 
-//----------------------------------------------------------------------------
-//	Default-Koordinatensystem fuer alle Controls
-//----------------------------------------------------------------------------
-map.displayProjection = new OpenLayers.Projection ('EPSG:4326');
+	//----------------------------------------------------------------------------
+	//	Default-Koordinatensystem fuer alle Controls
+	//----------------------------------------------------------------------------
+	map.displayProjection = new OpenLayers.Projection ('EPSG:4326');
 
-/* {{{ Patch updateLink function */
-OpenLayers.Control.Permalink.prototype.updateLink = function() {
-	permalinkObject = this;
-	var href=this.base;
-	if(href.indexOf('?')!=-1){
-		href=href.substring(0,href.indexOf('?'));
-	}
-	href+='?'+OpenLayers.Util.getParameterString(OpenLayers.Util.extend(this.createParams(), permalinkParams));
-	this.element.href=href;
-};
-/* }}} */
-
-/* {{{ Steuerelemente */
-map.addControl(new OpenLayers.Control.LayerSwitcher());
-map.addControl(new OpenLayers.Control.MousePosition());
-map.addControl(new OpenLayers.Control.Navigation());
-map.addControl(new OpenLayers.Control.PanZoomBar());
-map.addControl(new OpenLayers.Control.Permalink());
-map.addControl(new OpenLayers.Control.ZoomStatus({
-	html: i18n.t('texts.low zoom level'),
-}));
-map.addControl(new OpenLayers.Control.LoadStatus({
-	html: '<img src="img/ajax-loader.gif" /><br />${layers}'
-}));
-map.addControl(new OpenLayers.Control.Attribution());
-/* }}} */
-
-/* {{{ Base layers */
-map.addLayer(new OpenLayers.Layer.OSM.Mapnik('Mapnik'));
-map.addLayer(new OpenLayers.Layer.OSM.CycleMap('CycleMap'));
-/* }}} */
-
-/* {{{ opening_hours layer */
-map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like values (opening_hours, lit, …)', {
-
-	minZoom: 11,
-	blockSize: 0, // no cache
-	clusterSize: 16,
-	clusterLimit: 50,
-	reftime: new Date(),
-
-	createHtmlFromData: function (data) {
-		var h_icon = '<img src="' + this.getIconUrl(data) + '" alt=""/>';
-		var h_name = this.html(data.name||data.ref||data.barrier||data.operator||data.shop||data.amenity||data.craft||data.id);
-		if (typeof data.cuisine == 'string') {
-			h_name += ' (cuisine: ' + data.cuisine + ')';
+	/* {{{ Patch updateLink function */
+	OpenLayers.Control.Permalink.prototype.updateLink = function() {
+		permalinkObject = this;
+		var href=this.base;
+		if(href.indexOf('?')!=-1){
+			href=href.substring(0,href.indexOf('?'));
 		}
-		if (typeof data.barrier == 'string') {
-			h_name = 'barrier: ' + h_name;
-		}
+		href+='?'+OpenLayers.Util.getParameterString(OpenLayers.Util.extend(this.createParams(), permalinkParams));
+		this.element.href=href;
+	};
+	/* }}} */
 
-		var text = '<h3>'+h_icon+'&#160;'+h_name+'</h3>\n';
-		text += '<div class="v">'+this.html(data._oh_value)+'</div>';
+	/* {{{ Steuerelemente */
+	map.addControl(new OpenLayers.Control.LayerSwitcher());
+	map.addControl(new OpenLayers.Control.MousePosition());
+	map.addControl(new OpenLayers.Control.Navigation());
+	map.addControl(new OpenLayers.Control.PanZoomBar());
+	map.addControl(new OpenLayers.Control.Permalink());
+	map.addControl(new OpenLayers.Control.ZoomStatus({
+		html: i18n.t('texts.low zoom level'),
+	}));
+	map.addControl(new OpenLayers.Control.LoadStatus({
+		html: '<img src="img/ajax-loader.gif" /><br />${layers}'
+	}));
+	map.addControl(new OpenLayers.Control.Attribution());
+	/* }}} */
 
-		this.evaluateOH(data);
+	/* {{{ Base layers */
+	map.addLayer(new OpenLayers.Layer.OSM.Mapnik('Mapnik'));
+	map.addLayer(new OpenLayers.Layer.OSM.CycleMap('CycleMap'));
+	/* }}} */
+
+	/* {{{ opening_hours layer */
+	map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker('opening hours like values (opening_hours, lit, …)', {
+
+		minZoom: 11,
+		blockSize: 0, // no cache
+		clusterSize: 16,
+		clusterLimit: 50,
+		reftime: new Date(),
+
+		createHtmlFromData: function (data) {
+			var h_icon = '<img src="' + this.getIconUrl(data) + '" alt=""/>';
+			var h_name = this.html(data.name||data.ref||data.barrier||data.operator||data.shop||data.amenity||data.craft||data.id);
+			if (typeof data.cuisine == 'string') {
+				h_name += ' (cuisine: ' + data.cuisine + ')';
+			}
+			if (typeof data.barrier == 'string') {
+				h_name = 'barrier: ' + h_name;
+			}
+
+			var text = '<h3>'+h_icon+'&#160;'+h_name+'</h3>\n';
+			text += '<div class="v">'+this.html(data._oh_value)+'</div>';
+
+			this.evaluateOH(data);
+
 			if (data._oh_state == 'error' || data._oh_state == 'na') {
 				text += '<div class="e">'+data._oh_object+'</div>';
 			} else {
@@ -370,6 +371,7 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 						if (typeof tags_to_mode[OSM_tags[i]] == 'object'
 							&& typeof tags_to_mode[OSM_tags[i]][2] == 'object'
 							&& typeof tags_to_mode[OSM_tags[i]][2].map == 'object') {
+
 								var map = tags_to_mode[OSM_tags[i]][2].map;
 								console.log('Using value: "' + map[data._oh_value] + '" instead of original value: "' + data._oh_value + '".');
 								if (typeof map[data._oh_value] == 'string')
@@ -539,23 +541,23 @@ map.addLayer(poi_layer = new OpenLayers.Layer.PopupMarker ('opening hours like v
 					return true;
 			}
 		},
-
-	}));
-	/* }}} */
-
-	//----------------------------------------------------------------------------
-	//	Stelle bestimmten Bereich in maximaler Groesse dar
-	//----------------------------------------------------------------------------
-
-	if (!map.getCenter()) {
-		map.zoomToExtent(
-			new OpenLayers.Bounds(7.1042, 50.7362, 7.1171, 50.7417).
-				transform(new OpenLayers.Projection('EPSG:4326'), map.getProjectionObject())
-		);
 	}
-	/* }}} */
+));
+/* }}} */
 
-	document.getElementById('tag_selector_input').onchange = keyChanged;
+//----------------------------------------------------------------------------
+//	Stelle bestimmten Bereich in maximaler Groesse dar
+//----------------------------------------------------------------------------
+
+if (!map.getCenter()) {
+	map.zoomToExtent(
+		new OpenLayers.Bounds(7.1042, 50.7362, 7.1171, 50.7417).
+			transform(new OpenLayers.Projection('EPSG:4326'), map.getProjectionObject())
+	);
+}
+/* }}} */
+
+document.getElementById('tag_selector_input').onchange = keyChanged;
 
 });
 /*]]>*/

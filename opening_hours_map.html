@@ -406,8 +406,8 @@ document.onLoadFunctions.push ( function () {
 						data._oh_state = 'ok';
 					}
 				}
-				return data._oh_state;
 			}
+			return data._oh_state;
 		},
 
 		lastLat: undefined,
@@ -431,6 +431,19 @@ document.onLoadFunctions.push ( function () {
 			this.erase(true);
 
 			for (var i in elements) {
+				this.evaluateOH(elements[i].tags);
+			}
+			elements.sort(
+				function (a, b) {
+					if (a.tags._oh_state === 'ok' && b.tags._oh_state === 'ok') {
+						return a.tags._it_object.getState() - b.tags._it_object.getState();
+					} else {
+						var order = [ 'ok', 'warning', 'error', 'na' ];
+						return order.indexOf(a.tags._oh_state) - order.indexOf(b.tags._oh_state);
+					}
+				}
+			);
+			for (var i in elements) {
 				var element = elements[i];
 				var data = element.tags;
 				if (!data) data = {};
@@ -446,7 +459,7 @@ document.onLoadFunctions.push ( function () {
 					data.lat = element.lat;
 					data.lon = element.lon;
 				}
-				this.createMarker (data);
+				this.createMarker(data);
 			}
 
 			var nominatim;

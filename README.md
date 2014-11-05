@@ -6,6 +6,8 @@ This map shows the opening_hours as nicely readable time table.
 
 [Check it out][online]
 
+A mirror is setup up under: http://ypid.de/~osm/
+
 ## Install
 
 Just clone the repository:

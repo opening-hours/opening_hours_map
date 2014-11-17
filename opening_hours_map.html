@@ -285,9 +285,8 @@ document.onLoadFunctions.push ( function () {
 
 		getIconUrl: function (data) {
 			if (this.evaluateOH(data) != 'na') {
-				var oh = data._oh_object;
 				switch (data._oh_state) {
-				case 'ok': case 'warning': return 'img/circle_' + (oh.getState() ? 'green' : (oh.getUnknown() ? 'yellow' : 'red'))
+				case 'ok': case 'warning': return 'img/circle_' + (data._it_object.getState() ? 'green' : (data._it_object.getUnknown() ? 'yellow' : 'red'))
 					   + (data._oh_state == 'warning' ? '_warn' : '') + '.png';
 				case 'error':   return 'img/circle_err.png';
 				default: return false;
@@ -581,6 +580,7 @@ document.getElementById('tag_selector_input').onchange = keyChanged;
 </head>
 
 <body>
+<noscript>You don‘t have JavaScript enabled and thats a good thing but this tool makes heavy use of JavaScript so you need to enable it in order to use this tool. If you don’t trust the code that is going to be executed that is good as well. I encourage you to read all the source code on <a href="https://github.com/ypid/opening_hours.js">Github</a>. Also note that every commit and all releases are gpg signed. You might want to checkout this as well :) Stay safe.</noscript>
 <div id="map"></div>
 
 <script type="text/javascript">

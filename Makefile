@@ -1,9 +1,9 @@
 OpenLayersVersion?=	2.13.1
 
-installDependencies: js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js opening_hours.js/node_modules/suncalc/suncalc.js
-	git submodule update --init --recursive
+installDependencies: git_submodules js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js opening_hours.js/node_modules/suncalc/suncalc.js
 
-opening_hours.js/node_modules/suncalc/suncalc.js:
+git_submodules:
+	git submodule update --init --recursive
 	cd opening_hours.js/ && npm install
 
 js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js:

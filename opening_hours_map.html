@@ -14,6 +14,7 @@
 var repo_url = 'https://github.com/ypid/opening_hours_map';
 var html_url = 'http://openingh.openstreetmap.de/';
 var wiki_url = 'http://wiki.openstreetmap.org/wiki/Key:opening_hours';
+var evaluation_tool_url = 'evaluation_tool/';
 var map;
 
 if (!document.onLoadFunctions) {
@@ -27,7 +28,7 @@ var permalinkParams = {};
 var permalinkObject;
 
 function Evaluate(number, reset, value) {
-	window.open('http://openingh.openstreetmap.de/evaluation_tool/' + '?EXP='+encodeURIComponent(value), '_blank');
+	window.open(evaluation_tool_url + '?EXP='+encodeURIComponent(value), '_blank');
 }
 
 // From https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
@@ -41,7 +42,7 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
 		'&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('http://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18n.t('texts.load all with JOSM') + '</a>'+
 		'&nbsp;&nbsp;<a href="javascript:josm(\'load_object?objects=' + short_type + id + '&select=' + short_type + id + '\')">JOSM</a>'+
 		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/browse/'+type+'/'+id+'" target="_blank">Details</a>'
-		+ '&nbsp;&nbsp;<a href="http://openingh.openstreetmap.de/evaluation_tool/index.html?EXP='
+		+ '&nbsp;&nbsp;<a href="' + evaluation_tool_url + '?EXP='
 		+ encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">' + i18n.t('texts.evaluation tool') + '</a>';
 	return content;
 }

@@ -87,6 +87,7 @@ document.onLoadFunctions.push ( function () {
 	};
 
 	permalinkParams.filter = OpenLayers.Util.getParameters().filter || 'none';
+	document.getElementById('filter_form_' + permalinkParams.filter).checked = true;
 
 	window.applyNewFilter = function (myRadio) {
 		permalinkParams.filter = myRadio.value;

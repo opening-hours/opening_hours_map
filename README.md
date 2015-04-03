@@ -12,13 +12,14 @@ A mirror is setup up under: http://ypid.de/~osm/
 
 Just clone the repository:
 
-```
+```Shell
 git clone --recursive https://github.com/ypid/opening_hours_map.git
 ```
 
 and install it’s dependencies (execute inside the repository):
-```
-make installDependencies
+
+```Shell
+make dependencies-get
 ```
 
 ## How does it work?

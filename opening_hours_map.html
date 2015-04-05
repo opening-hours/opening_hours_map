@@ -105,8 +105,9 @@ document.onLoadFunctions.push ( function () {
 		params[tmparr[0]] = tmparr[1];
 	}
 
-	if (typeof params['mode'] != 'undefined')
+	if (typeof params['mode'] != 'undefined') {
 		OHMode = parseInt(params['mode']);
+	}
 
 	if (typeof params['tags'] != 'string') {
 		switch (OHMode) {

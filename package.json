@@ -1,0 +1,9 @@
+{
+    "name": "opening_hours_map",
+    "description": "Map which evaluates opening_hours like tags.",
+    "version": "0.7.0",
+    "private": true,
+    "dependencies": {
+        "opening_hours": "*"
+    }
+}

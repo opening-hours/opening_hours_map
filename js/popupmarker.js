@@ -1706,7 +1706,7 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
 		var result = [];
 
 		if (osm) {
-			result.push ('<a target="_blank" href="http://www.openstreetmap.org/browse/' +
+			result.push ('<a target="_blank" href="http://www.openstreetmap.org/' +
 				type + '/' + id + '">' + type + ' ' + id + '</a>' + ' - edit with');
 		} else {
 			result.push ('edit area with');

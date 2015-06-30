@@ -41,7 +41,7 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
 		'<a href="http://www.openstreetmap.org/edit?'+short_type+'='+id+'&editor=potlatch2" target="_blank">Potlatch</a>'+
 		'&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('http://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18n.t('texts.load all with JOSM') + '</a>'+
 		'&nbsp;&nbsp;<a href="javascript:josm(\'load_object?objects=' + short_type + id + '&select=' + short_type + id + '\')">JOSM</a>'+
-		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/browse/'+type+'/'+id+'" target="_blank">Details</a>'
+		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/'+type+'/'+id+'" target="_blank">Details</a>'
 		+ '&nbsp;&nbsp;<a href="' + evaluation_tool_url + '?EXP='
 		+ encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">' + i18n.t('texts.evaluation tool') + '</a>';
 	return content;

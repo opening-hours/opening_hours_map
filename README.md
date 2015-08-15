@@ -1,6 +1,6 @@
 # opening_hours_map
 
-[opening_hours](http://wiki.openstreetmap.org/wiki/Key:opening_hours) tag is used in [OpenStreetMap](http://openstreetmap.org) project to describe time ranges when a specific facility (for example, a cafe) is open.
+[opening_hours](https://wiki.openstreetmap.org/wiki/Key:opening_hours) tag is used in [OpenStreetMap](https://openstreetmap.org) project to describe time ranges when a specific facility (for example, a cafe) is open.
 
 This map shows the opening_hours as nicely readable time table.
 
@@ -39,7 +39,7 @@ The map uses OpenLayers to show a base map from OpenStreetMap. An additional opt
 * The opening_hours evaluation is handled by the [opening_hours.js][oh-lib] library.
 
 ## Author
-[Robin `ypid` Schneider](http://wiki.openstreetmap.org/wiki/User:Ypid)
+[Robin `ypid` Schneider](https://wiki.openstreetmap.org/wiki/User:Ypid)
 
 <!-- Credits {{{ -->
 ## Credits ##
@@ -52,7 +52,7 @@ The map uses OpenLayers to show a base map from OpenStreetMap. An additional opt
 [ol-lib]: http://openlayers.org/
 [oh-lib]: https://github.com/ypid/opening_hours.js
 [examples]: http://www.netzwolf.info/kartografie/openlayers/
-[OverpassAPI]: http://overpass-api.de/
-[OverpassQL]: http://wiki.openstreetmap.org/wiki/OverpassQL
+[OverpassAPI]: https://overpass-api.de/
+[OverpassQL]: https://wiki.openstreetmap.org/wiki/OverpassQL
 [online]: http://openingh.openstreetmap.de
-[fossgis-project]: http://wiki.openstreetmap.org/wiki/FOSSGIS/Server/Projects/opening_hours.js
+[fossgis-project]: https://wiki.openstreetmap.org/wiki/FOSSGIS/Server/Projects/opening_hours.js

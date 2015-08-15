@@ -13,7 +13,7 @@
 /*<![CDATA[*/
 var repo_url = 'https://github.com/ypid/opening_hours_map';
 var html_url = 'http://openingh.openstreetmap.de/';
-var wiki_url = 'http://wiki.openstreetmap.org/wiki/Key:opening_hours';
+var wiki_url = 'https://wiki.openstreetmap.org/wiki/Key:opening_hours';
 var evaluation_tool_url = 'evaluation_tool/';
 var map;
 
@@ -36,12 +36,12 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
 	var short_type = type.substr(0, 1);
 	// add some links to the bottom of a popup
 	content += '<br />';
-	content += '<a href="http://www.openstreetmap.org/edit?editor=id&'+short_type+'='+id+'" target="_blank">iD</a>&nbsp;&nbsp;';
+	content += '<a href="https://www.openstreetmap.org/edit?editor=id&'+short_type+'='+id+'" target="_blank">iD</a>&nbsp;&nbsp;';
 	content +=
-		'<a href="http://www.openstreetmap.org/edit?'+short_type+'='+id+'&editor=potlatch2" target="_blank">Potlatch</a>'+
+		'<a href="https://www.openstreetmap.org/edit?'+short_type+'='+id+'&editor=potlatch2" target="_blank">Potlatch</a>'+
 		'&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('http://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18n.t('texts.load all with JOSM') + '</a>'+
 		'&nbsp;&nbsp;<a href="javascript:josm(\'load_object?objects=' + short_type + id + '&select=' + short_type + id + '\')">JOSM</a>'+
-		'&nbsp;&nbsp;<a href="http://www.openstreetmap.org/'+type+'/'+id+'" target="_blank">Details</a>'
+		'&nbsp;&nbsp;<a href="https://www.openstreetmap.org/'+type+'/'+id+'" target="_blank">Details</a>'
 		+ '&nbsp;&nbsp;<a href="' + evaluation_tool_url + '?EXP='
 		+ encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">' + i18n.t('texts.evaluation tool') + '</a>';
 	return content;
@@ -458,7 +458,7 @@ document.onLoadFunctions.push ( function () {
 			if (typeof elements[0] != 'undefined' && (typeof this.lastLat == 'undefined'
 				|| Math.abs(this.lastLat - elements[0].lat) > 2
 				|| Math.abs(this.lastLon - elements[0].lon) > 2)) {
-				var url = 'http://open.mapquestapi.com/nominatim/v1/reverse.php';
+				var url = 'https://open.mapquestapi.com/nominatim/v1/reverse.php';
 				url += '?format=json&osm_type=' + elements[0].type.substr(0,1).toUpperCase() + '&osm_id=' + elements[0].id
 					+ '&zoom=5&addressdetails=1&email=ypid23@aol.de';
 				var url_lang_set = 'accept-language=';
@@ -658,8 +658,8 @@ document.getElementById('tag_selector_input').onchange = keyChanged;
 	document.write('</p><p>');
 	document.write(i18n.t('texts.data source', {
 		APIaTag:      '<a href="http://overpass-api.de/">Overpass API</a>',
-		OSMaTag:      '<a href="http://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
-		OSMStartaTag: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>',
+		OSMaTag:      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
+		OSMStartaTag: '<a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
 		}) + '<br />');
 	document.write(i18n.t('texts.this website', { url: repo_url, hoster: 'GitHub' }));
 	document.write('</p>');

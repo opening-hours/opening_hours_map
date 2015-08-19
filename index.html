@@ -417,7 +417,7 @@ document.onLoadFunctions.push ( function () {
 
 		lastLat: undefined,
 		lastLon: undefined,
-		nominatim: undefined,
+		nominatim: {},
 		url_lang: 'de',
 		poi_data: undefined,
 
@@ -425,8 +425,9 @@ document.onLoadFunctions.push ( function () {
 		},
 
 		jsonCallback: function (data) {
-			if (typeof data === 'undefined')
+			if (typeof data === 'undefined') {
 				return;
+			}
 
 			var elements = data.elements;
 			if (!elements) {
@@ -454,11 +455,13 @@ document.onLoadFunctions.push ( function () {
 				this.createMarker (data);
 			}
 
-			var nominatim;
 			if (typeof elements[0] != 'undefined' && (typeof this.lastLat == 'undefined'
 				|| Math.abs(this.lastLat - elements[0].lat) > 2
 				|| Math.abs(this.lastLon - elements[0].lon) > 2)) {
-				var url = 'https://open.mapquestapi.com/nominatim/v1/reverse.php';
+
+				var nominatim = {};
+
+				var url = nominatim_api_url;
 				url += '?format=json&osm_type=' + elements[0].type.substr(0,1).toUpperCase() + '&osm_id=' + elements[0].id
 					+ '&zoom=5&addressdetails=1&email=ypid23@aol.de';
 				var url_lang_set = 'accept-language=';
@@ -469,14 +472,14 @@ document.onLoadFunctions.push ( function () {
 					if ( xhr.readyState == 4 && xhr.status == 200 ) {  // check for success
 						nominatim = JSON.parse( xhr.responseText );
 
-						// console.log(JSON.stringify(this.nominatim, null, '\t'));
-						if (this.nominatim.address.country_code != this.url_lang) {
-							xhr.open( "GET", url + '&' + url_lang_set + this.nominatim.address.country_code, false );
+						// console.log(JSON.stringify(nominatim, null, '\t'));
+						if (nominatim.address.country_code !== this.url_lang) {
+							xhr.open( "GET", url + '&' + url_lang_set + nominatim.address.country_code, false );
 							xhr.onreadystatechange = function () {
 								if ( xhr.readyState == 4 && xhr.status == 200 ) {  // check for success
 									nominatim = JSON.parse( xhr.responseText );
 								}
-								this.url_lang = this.nominatim.address.country_code;
+								this.url_lang = nominatim.address.country_code;
 							}
 							xhr.send(null);
 						}

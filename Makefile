@@ -20,3 +20,10 @@ dependencies-get: js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js
 js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js:
 	-wget --no-clobber -O js/OpenLayers-$(OpenLayersVersion).tar.gz https://github.com/openlayers/openlayers/releases/download/release-$(OpenLayersVersion)/OpenLayers-$(OpenLayersVersion).tar.gz
 	tar -xzf js/OpenLayers-$(OpenLayersVersion).tar.gz -C js/
+
+.PHONY: publish-website-on-all-servers
+publish-website-on-all-servers: publish-website-on-openingh.openstreetmap.de
+
+.PHONY: publish-website-on-openingh.openstreetmap.de
+publish-website-on-openingh.openstreetmap.de:
+	rsync . --archive gauss.osm.de:~/www

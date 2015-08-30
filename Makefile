@@ -13,6 +13,9 @@ list:
 ready-for-hosting: dependencies-get
 	$(MAKE) --directory opening_hours.js/ ready-for-hosting
 
+taginfo.json: ./opening_hours.js/gen_taginfo_json.js ./opening_hours.js/related_tags.txt taginfo_template.json
+	$< --key-file ./opening_hours.js/related_tags.txt --template-file taginfo_template.json > "$@"
+
 .PHONY: dependencies-get
 dependencies-get: js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js
 	git submodule update --init --recursive
@@ -26,4 +29,4 @@ publish-website-on-all-servers: publish-website-on-openingh.openstreetmap.de
 
 .PHONY: publish-website-on-openingh.openstreetmap.de
 publish-website-on-openingh.openstreetmap.de:
-	rsync . --archive gauss.osm.de:~/www
+	rsync  --archive * gauss.osm.de:~/www -v

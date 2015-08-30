@@ -1,0 +1,59 @@
+{
+	"data_format": 1,
+	"data_url": "https://raw.githubusercontent.com/ypid/opening_hours_map/master/taginfo.json",
+	"project": {
+		"name": "opening_hours map",
+		"description": "opening_hours map",
+		"project_url": "http://openingh.openstreetmap.de/",
+		"doc_url": "https://github.com/ypid/opening_hours_map",
+		"icon_url": "http://openingh.openstreetmap.de/favicon.png",
+		"contact_name": "Robin Schneider",
+		"contact_email": "ypid@riseup.net"
+	},
+	"tags": [
+		{
+			"key": "opening_hours",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "opening_hours:kitchen",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "opening_hours:warm_kitchen",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "happy_hours",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "delivery_hours",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "opening_hours:delivery",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "lit",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "smoking_hours",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "collection_times",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "service_times",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		},
+		{
+			"key": "fee",
+			"description": "Map which evaluates this tag with support for all features in the opening_hours syntax."
+		}
+	]
+}

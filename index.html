@@ -578,9 +578,13 @@ document.getElementById('tag_selector_input').onchange = keyChanged;
 <script type="text/javascript" src="opening_hours.js/opening_hours+deps.min.js"></script>
 <script type="text/javascript">
 	var opening_hours = require('opening_hours');
-	var moment = require('moment');
+	/* Does not accept language change in Browser. Probably not the
+	 * correct version as it was bundled for NodeJS.
+	 */
+	// var moment = require('moment');
 	var i18n = require('i18next-client');
 </script>
+<script type="text/javascript" src="opening_hours.js/node_modules/moment/min/moment-with-locales.min.js"></script>
 <script type="text/javascript" src="opening_hours.js/js/i18n-resources.js"></script>
 <script type="text/javascript" src="opening_hours.js/js/opening_hours_table.js"></script>
 <script type="text/javascript" src="opening_hours.js/js/helpers.js"></script>

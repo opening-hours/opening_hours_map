@@ -25,8 +25,12 @@ js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js:
 	tar -xzf js/OpenLayers-$(OpenLayersVersion).tar.gz -C js/
 
 .PHONY: publish-website-on-all-servers
-publish-website-on-all-servers: publish-website-on-openingh.openstreetmap.de
+publish-website-on-all-servers: publish-website-on-openingh.openstreetmap.de publish-website-on-ypid.de
 
 .PHONY: publish-website-on-openingh.openstreetmap.de
 publish-website-on-openingh.openstreetmap.de:
 	rsync  --archive * gauss.osm.de:~/www -v
+
+.PHONY: publish-website-on-openingh.openstreetmap.de
+publish-website-on-ypid.de:
+	rsync  --archive * osm_admin@js-1und1-vps:/srv/www/osm/userdir/public -v

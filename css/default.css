@@ -1,139 +1,139 @@
 noscript { color: #AA4400 }
 .olMap {
-	color: black;
+    color: black;
 }
 
 .olMap a {
-	background: transparent;
-	color: blue;
-	text-decoration: none;
+    background: transparent;
+    color: blue;
+    text-decoration: none;
 }
 
 .olControlAttribution {
-	bottom: 0.1em !important;
-	left: 0.1em;
-	right: auto !important;
+    bottom: 0.1em !important;
+    left: 0.1em;
+    right: auto !important;
 }
 
 .olControlLoadStatus {
-	left: 50px;
-	top: 10px;
+    left: 50px;
+    top: 10px;
 }
 
 .olControlMaplink {
-	right: 0.1em;
-	font-size: smaller;
+    right: 0.1em;
+    font-size: smaller;
 }
 
 #ml1 {
-	bottom: 4.2em;
+    bottom: 4.2em;
 }
 
 #ml2 {
-	bottom: 3.0em;
+    bottom: 3.0em;
 }
 
 .olControlMousePosition {
-	background: white;
-	bottom: 0.1em;
-	font-family: Monospace;
-	opacity: 0.7;
-	right: 0.1em;
+    background: white;
+    bottom: 0.1em;
+    font-family: Monospace;
+    opacity: 0.7;
+    right: 0.1em;
 }
 
 .olControlZoomstatus {
-	bottom: 1.5em;
-	left: 0px;
-	background: white;
-	opacity: 0.7;
+    bottom: 1.5em;
+    left: 0px;
+    background: white;
+    opacity: 0.7;
 }
 
 /* .olFramedCloudPopupContent { */
-/* 	max-height: 400px; */
+/*     max-height: 400px; */
 /* } */
 /*  */
 /* .olFramedCloudPopupContent, */
 /* .olFramedCloudPopupContent table { */
-/* 	color: black; */
+/*     color: black; */
 /* } */
 
 .olFramedCloudPopupContent h3 {
-	font-size: 120%;
-	font-weight: bold;
-	margin: 0;
+    font-size: 120%;
+    font-weight: bold;
+    margin: 0;
 }
 
 .olFramedCloudPopupContent h3 img {
-	height: 16px;
-	width: 16px;
+    height: 16px;
+    width: 16px;
 }
 
 /* .olFramedCloudPopupContent td { */
-/* 	background: transparent; */
-/* 	margin: 0; */
-/* 	padding: 0; */
+/*     background: transparent; */
+/*     margin: 0; */
+/*     padding: 0; */
 /* } */
 /*  */
 /* .olFramedCloudPopupContent p { */
-/* 	font-size: xx-small; */
-/* 	margin: 0 0 1em; */
-/* 	text-align: right; */
+/*     font-size: xx-small; */
+/*     margin: 0 0 1em; */
+/*     text-align: right; */
 /* } */
 
 .olFramedCloudPopupContent hr {
-	display: none;
+    display: none;
 }
 
 .olFramedCloudPopupContent .v {
-	color:black;
-	background: #dddddd;
-	border: 1px solid gray;
-	font-family: Monospace;
+    color:black;
+    background: #dddddd;
+    border: 1px solid gray;
+    font-family: Monospace;
 }
 
 .olFramedCloudPopupContent .e {
-	background: red;
-	color: white;
-	font-weight: bold;
-	padding: 2px;
+    background: red;
+    color: white;
+    font-weight: bold;
+    padding: 2px;
 }
 
 .olFramedCloudPopupContent .m {
-	background: gray;
-	color: white;
-	font-weight: bold;
-	padding: 2px;
+    background: gray;
+    color: white;
+    font-weight: bold;
+    padding: 2px;
 }
 
 .olFramedCloudPopupContent .o {
-	color: blue;
+    color: blue;
 }
 
 .olFramedCloudPopupContent .c {
-	color: gray;
+    color: gray;
 }
 
 .olFramedCloudPopupContent .u {
-	color: red;
+    color: red;
 }
 
 .olFramedCloudPopupContent .t {
-	color: red;
+    color: red;
 }
 
 #map {
-	background: gray;
-	height:100%;
-	width:100%;
+    background: gray;
+    height:100%;
+    width:100%;
 }
 .olFramedCloudPopupContent {
     overflow: auto !important;}
 
 @media print {
-	.olControlMousePosition,
-	.olControlPanZoomBar,
-	.olControlPermalink,
-	.olControlZoomstatus {
-		display: none !important;
-	}
+    .olControlMousePosition,
+    .olControlPanZoomBar,
+    .olControlPermalink,
+    .olControlZoomstatus {
+        display: none !important;
+    }
 }

@@ -10,100 +10,103 @@
         <script type="text/javascript" src="js/loadstatus.js"></script>
         <script type="text/javascript" src="js/zoomstatus.js"></script>
         <script type="text/javascript" src="opening_hours.js/opening_hours+deps.min.js"></script>
+        <script type="text/javascript" src="opening_hours.js/bower_components/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="opening_hours.js/js/countryToLanguageMapping.js"></script>
+        <script type="text/javascript" src="opening_hours.js/js/helpers.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
         <script type="text/javascript" src="opening_hours.js/node_modules/moment/min/moment-with-locales.min.js"></script>
         <script type="text/javascript" src="opening_hours.js/js/i18n-resources.js"></script>
         <script type="text/javascript" src="opening_hours.js/js/opening_hours_table.js"></script>
-        <script type="text/javascript" src="opening_hours.js/js/helpers.js"></script>
         <link rel="stylesheet" href="opening_hours.js/css/table.css"/>
         <link rel="stylesheet" href="css/default.css"/>
     </head> <!-- }}} -->
     <body><!-- {{{ -->
-<noscript>You don‘t have JavaScript enabled and thats a good thing but this tool makes heavy use of JavaScript so you need to enable it in order to use this tool. If you don’t trust the code that is going to be executed that is good as well. I encourage you to read all the source code on <a href="https://github.com/ypid/opening_hours.js">Github</a>. Also note that every commit and all releases are gpg signed. You might want to check this out as well :) Stay safe.</noscript>
-<div id="map"></div>
+        <noscript>You don‘t have JavaScript enabled and that is a good thing but this tool makes heavy use of JavaScript so you need to enable it in order to use this tool. If you don’t trust the code that is going to be executed that is good as well. I encourage you to read all the source code on <a href="https://github.com/ypid/opening_hours.js">Github</a>. Also note that every commit and all releases are GPG signed. You might want to check this out as well :) Stay safe.</noscript>
 
-<script type="text/javascript">
-    document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');
-    document.title = i18n.t('texts.heading map');
-    document.write(getUserSelectTranslateHTMLCode());
+        <div id="map"></div>
 
-    function submitenter(myfield,e) {
-        var keycode;
-        if (window.event) {
-            keycode = window.event.keyCode;
-        }
-        else if (e) {
-            keycode = e.which;
-        }
-        else {
-            return true;
-        }
-
-        if (keycode == 13) {
-            useUserKey(document.getElementById(myfield.id).value);
-            keyChanged();
-            return false;
-        } else {
-            return true;
-        }
-    }
-</script>
-
-<div id="tag_selector">
-    <script type="text/javascript">
-        document.write('<strong>' + i18n.t('texts.config POIs') + '</strong>:');
-    </script>
-    <select id="tag_selector_input" name="tag_selector_input">
         <script type="text/javascript">
-            for (var tag in tags_to_mode) {
-                document.write('<option value="' + tags_to_mode[tag][1] + '">' + tag + '</option>');
+            document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');
+            document.title = i18n.t('texts.heading map');
+            document.write(getUserSelectTranslateHTMLCode());
+
+            function submitenter(myfield,e) {
+                var keycode;
+                if (window.event) {
+                    keycode = window.event.keyCode;
+                }
+                else if (e) {
+                    keycode = e.which;
+                }
+                else {
+                    return true;
+                }
+
+                if (keycode == 13) {
+                    useUserKey(document.getElementById(myfield.id).value);
+                    keyChanged();
+                    return false;
+                } else {
+                    return true;
+                }
             }
         </script>
-    </select>
-    <form id="userKey" action="">
-    <input id="key" style="width:20%" name="key" onKeyPress="return submitenter(this,event)" />
-    </form>
-</div>
 
-<script type="text/javascript">
-    document.write(i18n.t('texts.map is showing', { wikiUrl: wiki_url }));
-    document.write('<ul>');
-    document.write('<li>' + i18n.t('words.green')  + ': ' + i18n.t('texts.open now') + '</li>');
-    document.write('<li>' + i18n.t('words.yellow') + ': ' + i18n.t('texts.unknown now') + '</li>');
-    document.write('<li>' + i18n.t('words.red')    + ': ' + i18n.t('texts.closed now') + '</li>');
-    document.write('<li>' + i18n.t('words.violet')    + ': ' + i18n.t('texts.error') + '</li>');
-    document.write('</ul>');
-    document.write(i18n.t('texts.warning', { sign: '<q>W</q>' }));
-</script>
-</p>
+        <div id="tag_selector">
+            <script type="text/javascript">
+                document.write('<strong>' + i18n.t('texts.config POIs') + '</strong>:');
+            </script>
+            <select id="tag_selector_input" name="tag_selector_input">
+                <script type="text/javascript">
+                    for (var tag in tags_to_mode) {
+                        document.write('<option value="' + tags_to_mode[tag][1] + '">' + tag + '</option>');
+                    }
+                </script>
+            </select>
+            <form id="userKey" action="">
+            <input id="key" style="width:20%" name="key" onKeyPress="return submitenter(this,event)" />
+            </form>
+        </div>
 
-<div id="filter_selector"><p>
-<script type="text/javascript">
-    document.write(i18n.t('texts.map filter'));
-    document.write('<form name="filter_form">');
-    var showFilterOptions = ['none', 'error', 'warnOnly', 'errorOnly', 'open', 'unknown', 'closed', 'openOrUnknown'];
-    for (var i = 0; i < showFilterOptions.length; i++) {
-        var filter_id = showFilterOptions[i];
-        document.write('<label><input type="radio" name="filter"'
-                + ' value="' + filter_id + '"'
-                + ' id="filter_form_' + filter_id + '"'
-                + ' onclick="applyNewFilter(this)">' + i18n.t('texts.filter.' + filter_id) + '</input></label><br>');
-    }
-    document.write('</form>');
-    document.getElementById('filter_form_none').checked = true;
-</script>
-</p></div>
+        <script type="text/javascript">
+            document.write(i18n.t('texts.map is showing', { wikiUrl: wiki_url }));
+            document.write('<ul>');
+            document.write('<li>' + i18n.t('words.green')  + ': ' + i18n.t('texts.open now') + '</li>');
+            document.write('<li>' + i18n.t('words.yellow') + ': ' + i18n.t('texts.unknown now') + '</li>');
+            document.write('<li>' + i18n.t('words.red')    + ': ' + i18n.t('texts.closed now') + '</li>');
+            document.write('<li>' + i18n.t('words.violet')    + ': ' + i18n.t('texts.error') + '</li>');
+            document.write('</ul>');
+            document.write(i18n.t('texts.warning', { sign: '<q>W</q>' }));
+        </script>
+        </p>
 
-<script type="text/javascript">
-    document.write('</p><p>');
-    document.write(i18n.t('texts.data source', {
-        APIaTag:      '<a href="http://overpass-api.de/">Overpass API</a>',
-        OSMaTag:      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
-        OSMStartaTag: '<a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-        }) + '<br />');
-    document.write(i18n.t('texts.this website', { url: repo_url, hoster: 'GitHub' }));
-    document.write('</p>');
-</script>
+        <div id="filter_selector"><p>
+        <script type="text/javascript">
+            document.write(i18n.t('texts.map filter'));
+            document.write('<form name="filter_form">');
+            var showFilterOptions = ['none', 'error', 'warnOnly', 'errorOnly', 'open', 'unknown', 'closed', 'openOrUnknown'];
+            for (var i = 0; i < showFilterOptions.length; i++) {
+                var filter_id = showFilterOptions[i];
+                document.write('<label><input type="radio" name="filter"'
+                        + ' value="' + filter_id + '"'
+                        + ' id="filter_form_' + filter_id + '"'
+                        + ' onclick="applyNewFilter(this)">' + i18n.t('texts.filter.' + filter_id) + '</input></label><br>');
+            }
+            document.write('</form>');
+            document.getElementById('filter_form_none').checked = true;
+        </script>
+        </p></div>
 
-</body>
+        <script type="text/javascript">
+            document.write('</p><p>');
+            document.write(i18n.t('texts.data source', {
+                APIaTag:      '<a href="http://overpass-api.de/">Overpass API</a>',
+                OSMaTag:      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
+                OSMStartaTag: '<a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+                }) + '<br />');
+            document.write(i18n.t('texts.this website', { url: repo_url, hoster: 'GitHub' }));
+            document.write('</p>');
+        </script>
+
+    </body><!-- }}} -->
 </html>

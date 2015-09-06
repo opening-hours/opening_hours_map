@@ -4,6 +4,8 @@ var wiki_url = 'https://wiki.openstreetmap.org/wiki/Key:opening_hours';
 var evaluation_tool_url = 'evaluation_tool/';
 var map;
 
+var nominatim_data_global = {};
+
 var opening_hours = require('opening_hours');
 /* Does not accept language change in Browser. Probably not the
  * correct version as it was bundled for NodeJS.
@@ -317,7 +319,9 @@ document.onLoadFunctions.push ( function () {
         //    Muss nach Ändern von keyValues augerufen werden.
         //------------------------------------------------------------
         reloadPOIs: function () {
-            if (this.updateKeyValues) this.updateKeyValues();
+            if (this.updateKeyValues) {
+                this.updateKeyValues();
+            }
 
             var xml = this.overpassQL(this.keyValues);
             var url = 'http://overpass-api.de/api/interpreter?&data=' + encodeURIComponent(xml);
@@ -342,8 +346,13 @@ document.onLoadFunctions.push ( function () {
         overpassQL: function (keyvalues) {
             if (!(keyvalues instanceof Array)) keyvalues = [keyvalues];
 
-            var bbox = this.map.getExtent().
-                transform(this.map.getProjectionObject(),this.map.displayProjection);
+            var bbox = this.map.getExtent()
+                .transform(this.map.getProjectionObject(), this.map.displayProjection);
+
+            if ($.isEmptyObject(nominatim_data_global)) {
+                var nominatim_query = OpenLayers.String.format('&lat=${top}&lon=${left}', bbox);
+                this.updateNominatimData(nominatim_query);
+            }
 
             var bboxQuery = OpenLayers.String.format (
                 '[bbox:${bottom},${left},${top},${right}]',
@@ -387,7 +396,7 @@ document.onLoadFunctions.push ( function () {
 
                 var crashed = true;
                 try {
-                    var oh = new opening_hours(data._oh_value, this.nominatim, OHMode);
+                    var oh = new opening_hours(data._oh_value, nominatim_data_global, OHMode);
                     var it = oh.getIterator(this.reftime);
                     crashed = false;
                 } catch (err) {
@@ -411,11 +420,27 @@ document.onLoadFunctions.push ( function () {
 
         lastLat: undefined,
         lastLon: undefined,
-        nominatim: {},
-        url_lang: 'de',
         poi_data: undefined,
 
         createMarkerFromData: function(elements) {
+        },
+
+        /* FIXME */
+        // nominatim_data: {},
+        updateNominatimData: function (query) {
+            reverseGeocodeLocation(
+                query,
+                mapCountryToLanguage(i18n.lng()),
+                function(nominatim_data) {
+                    // console.log(JSON.stringify(nominatim_data, null, '\t'));
+                    /* http://stackoverflow.com/a/1144249 */
+                    if (JSON.stringify(nominatim_data_global) !== JSON.stringify(nominatim_data)) {
+                        // this.nominatim_data = nominatim_data;
+                        nominatim_data_global = nominatim_data;
+                        // poi_layer.redrawPOIs();
+                    }
+                }
+            );
         },
 
         jsonCallback: function (data) {
@@ -449,38 +474,12 @@ document.onLoadFunctions.push ( function () {
                 this.createMarker (data);
             }
 
-            if (typeof elements[0] != 'undefined' && (typeof this.lastLat == 'undefined'
+            if (typeof elements[0] !== 'undefined' && (typeof this.lastLat === 'undefined'
                 || Math.abs(this.lastLat - elements[0].lat) > 2
                 || Math.abs(this.lastLon - elements[0].lon) > 2)) {
 
-                var nominatim = {};
-
-                var url = nominatim_api_url;
-                url += '?format=json&osm_type=' + elements[0].type.substr(0,1).toUpperCase() + '&osm_id=' + elements[0].id
-                    + '&zoom=5&addressdetails=1&email=ypid23@aol.de';
-                var url_lang_set = 'accept-language=';
-
-                var xhr = new XMLHttpRequest();
-                xhr.open( "GET", url + '&' + url_lang_set + this.url_lang, false );      // true makes this call asynchronous
-                xhr.onreadystatechange = function () {    // need eventhandler since our call is async
-                    if ( xhr.readyState == 4 && xhr.status == 200 ) {  // check for success
-                        nominatim = JSON.parse( xhr.responseText );
-
-                        // console.log(JSON.stringify(nominatim, null, '\t'));
-                        if (nominatim.address.country_code !== this.url_lang) {
-                            xhr.open( "GET", url + '&' + url_lang_set + nominatim.address.country_code, false );
-                            xhr.onreadystatechange = function () {
-                                if ( xhr.readyState == 4 && xhr.status == 200 ) {  // check for success
-                                    nominatim = JSON.parse( xhr.responseText );
-                                }
-                                this.url_lang = nominatim.address.country_code;
-                            }
-                            xhr.send(null);
-                        }
-                    }
-                };
-                xhr.send(null);
-                this.nominatim = nominatim;
+                // console.log("updateNominatimData inside query");
+                this.updateNominatimData('&osm_type=' + elements[0].type.substr(0,1).toUpperCase() + '&osm_id=' + elements[0].id);
 
                 this.lastLat = elements[0].lat;
                 this.lastLon = elements[0].lon;

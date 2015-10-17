@@ -13,6 +13,10 @@ list:
 ready-for-hosting: dependencies-get
 	$(MAKE) --directory opening_hours.js/ ready-for-hosting
 
+.PHONY: opening_hours+deps.min.js
+opening_hours+deps.min.js:
+	$(MAKE) --directory opening_hours.js/ opening_hours+deps.min.js
+
 taginfo.json: ./opening_hours.js/gen_taginfo_json.js ./opening_hours.js/related_tags.txt taginfo_template.json
 	$< --key-file ./opening_hours.js/related_tags.txt --template-file taginfo_template.json > "$@"
 
@@ -28,9 +32,9 @@ js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js:
 publish-website-on-all-servers: publish-website-on-openingh.openstreetmap.de publish-website-on-ypid.de
 
 .PHONY: publish-website-on-openingh.openstreetmap.de
-publish-website-on-openingh.openstreetmap.de:
+publish-website-on-openingh.openstreetmap.de: opening_hours+deps.min.js
 	rsync  --archive * gauss.osm.de:~/www -v
 
 .PHONY: publish-website-on-openingh.openstreetmap.de
-publish-website-on-ypid.de:
-	rsync  --archive * osm_admin@js-1und1-vps:/srv/www/osm/userdir/public -v
+publish-website-on-ypid.de: opening_hours+deps.min.js
+	rsync  --archive * osm_admin@s17921260.onlinehome-server.info:/srv/www/osm/userdir/public -v

@@ -44,39 +44,33 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
 }
 
 var tmp = 0;
-/* Also used by opening_hours.js/real_test.js */
-/* FIXME: Use optional_conf_parm['key_name'] */
-var tags_to_mode = {
-    'opening_hours'        : [ 0, tmp++ ], // [ mode, selectedIndex, options hash from real_test ]
-    'collection_times'     : [ 2, tmp++ ],
-    'lit'                  : [ 0, tmp++,
-        {
-            map: {
-                'yes'      : 'sunset-sunrise open "specified as yes: At night (unknown time schedule or daylight detection)"',
-                'automatic': 'unknown "specified as automatic: When someone enters the way the lights are turned on."',
-                'no'       : 'off "specified as no: There are no lights installed."',
-                'interval' : 'unknown "specified as interval"',
-                'limited'  : 'unknown "specified as limited"',
-            }
-        }
-    ],
-    // 'opening_hours:*'   : [ 0, tmp++ ],
-    // '*:opening_hours'   : [ 0, tmp++ ],
-    // '*:opening_hours:*' : [ 0, tmp++ ],
-    'smoking_hours'        : [ 0, tmp++ ],
-    'service_times'        : [ 2, tmp++ ],
-    'happy_hours'          : [ 0, tmp++ ],
-}
+/* Source ../opening_hours.js/related_tags.txt */
+var related_tags = [
+    'opening_hours',
+    'opening_hours:kitchen',
+    'opening_hours:warm_kitchen',
+    'happy_hours',
+    'delivery_hours',
+    'opening_hours:delivery',
+    'lit',
+    'smoking_hours',
+    'collection_times',
+    'service_times',
+    //
+    // 'fee',
+];
 
 document.onLoadFunctions.push ( function () {
 
     window.useUserKey = function (key) {
-        if (typeof tags_to_mode[key] != 'object') { // Add new key to select.
+        console.log(key);
+        if (related_tags.indexOf(key) !== -1) { /* Add the new key to related_tags. */
             var select = document.getElementById('tag_selector_input');
-            tags_to_mode[key] = [ OHMode, select.options.length ];
+            related_tags.push(key);
             select.options[select.options.length] = new Option(key, select.options.length);
+        } else {
+            document.getElementById('tag_selector_input').selectedIndex = related_tags.indexOf(key);
         }
-        document.getElementById('tag_selector_input').selectedIndex = tags_to_mode[key][1];
     };
 
     window.keyChanged = function() {
@@ -114,15 +108,9 @@ document.onLoadFunctions.push ( function () {
         }
     } else {
         OSM_tags.push(params['tags']);
-        if (typeof params['mode'] == 'undefined' && typeof tags_to_mode[OSM_tags[0]] != 'undefined')
-            OHMode = tags_to_mode[OSM_tags[0]][0];
     }
 
-    if (typeof tags_to_mode[OSM_tags[0]] != 'undefined') {
-        document.getElementById('tag_selector_input').selectedIndex = tags_to_mode[OSM_tags[0]][1];
-    } else {
-        useUserKey(OSM_tags[0]);
-    }
+    useUserKey(OSM_tags[0]);
 
     /* {{{ OpenLayers */
     //----------------------------------------------------------------------------
@@ -372,31 +360,28 @@ document.onLoadFunctions.push ( function () {
         /* }}} */
 
         evaluateOH: function (data) {
-            if (typeof data._oh_value == 'undefined' && typeof data._oh_state == 'undefined') {
+            if (typeof data._oh_value === 'undefined' && typeof data._oh_state === 'undefined') {
                 for (var i=0; i < OSM_tags.length; i++) {
-                    if (typeof data[OSM_tags[i]] == 'string') {
+                    if (typeof data[OSM_tags[i]] === 'string') {
                         data._oh_value = data[OSM_tags[i]];
-                        if (typeof tags_to_mode[OSM_tags[i]] == 'object'
-                            && typeof tags_to_mode[OSM_tags[i]][2] == 'object'
-                            && typeof tags_to_mode[OSM_tags[i]][2].map == 'object') {
-
-                                var map = tags_to_mode[OSM_tags[i]][2].map;
-                                console.log('Using value: "' + map[data._oh_value] + '" instead of original value: "' + data._oh_value + '".');
-                                if (typeof map[data._oh_value] == 'string')
-                                    data._oh_value = map[data._oh_value];
-                        }
                         break;
                     }
                 }
-                if (typeof data._oh_value == 'undefined') {
-                    data._oh_value == false;
-                    data._oh_state = 'na'; // not applicable
+                if (typeof data._oh_value === 'undefined') {
+                    data._oh_value = false;
+                    data._oh_state = 'na'; /* Not applicable. */
                     return data._oh_state;
                 }
 
                 var crashed = true;
                 try {
-                    var oh = new opening_hours(data._oh_value, nominatim_data_global, OHMode);
+                    var oh = new opening_hours(data._oh_value, nominatim_data_global, {
+                            'mode': OHMode,
+                            // 'warnings_severity': 7,
+                            /* Use default for now. See: https://github.com/ypid/opening_hours.js/issues/81 */
+                            'locale': i18n.lng()
+                        }
+                            );
                     var it = oh.getIterator(this.reftime);
                     crashed = false;
                 } catch (err) {
@@ -490,16 +475,10 @@ document.onLoadFunctions.push ( function () {
         //    Update keyValues
         //------------------------------------------------------------
         updateKeyValues: function () {
-            for (var key in tags_to_mode) {
-                if (tags_to_mode[key][1] == document.getElementById('tag_selector_input').selectedIndex) {
-                    this.keyValues = [ key ];
-                    if (typeof tags_to_mode[key] != 'undefined')
-                        OHMode = tags_to_mode[key][0];
-                    OSM_tags = [ key ];
-                    permalinkParams.tags = key;
-                    break;
-                }
-            }
+            var key = related_tags[document.getElementById('tag_selector_input').selectedIndex];
+            this.keyValues = [ key ];
+            OSM_tags = [ key ];
+            permalinkParams.tags = key;
         },
 
         filter: function(data) {

@@ -28,13 +28,13 @@ js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js:
 	-wget --no-clobber -O js/OpenLayers-$(OpenLayersVersion).tar.gz https://github.com/openlayers/openlayers/releases/download/release-$(OpenLayersVersion)/OpenLayers-$(OpenLayersVersion).tar.gz
 	tar -xzf js/OpenLayers-$(OpenLayersVersion).tar.gz -C js/
 
-.PHONY: publish-website-on-all-servers
-publish-website-on-all-servers: publish-website-on-openingh.openstreetmap.de publish-website-on-ypid.de
+.PHONY: deploy-on-all-servers
+deploy-on-all-servers: deploy-on-openingh.openstreetmap.de deploy-on-ypid.de
 
-.PHONY: publish-website-on-openingh.openstreetmap.de
-publish-website-on-openingh.openstreetmap.de: opening_hours+deps.min.js
+.PHONY: deploy-on-openingh.openstreetmap.de
+deploy-on-openingh.openstreetmap.de: opening_hours+deps.min.js
 	rsync  --archive * gauss.osm.de:~/www -v
 
-.PHONY: publish-website-on-openingh.openstreetmap.de
-publish-website-on-ypid.de: opening_hours+deps.min.js
+.PHONY: deploy-on-openingh.openstreetmap.de
+deploy-on-ypid.de: opening_hours+deps.min.js
 	rsync  --archive * osm_admin@s17921260.onlinehome-server.info:/srv/www/osm/userdir/public -v

@@ -1,4 +1,4 @@
-var repo_url = 'https://github.com/ypid/opening_hours_map';
+var repo_url = 'https://github.com/opening-hours/opening_hours_map';
 var html_url = 'http://openingh.openstreetmap.de/';
 var wiki_url = 'https://wiki.openstreetmap.org/wiki/Key:opening_hours';
 var evaluation_tool_url = 'evaluation_tool/';
@@ -378,7 +378,7 @@ document.onLoadFunctions.push ( function () {
                     var oh = new opening_hours(data._oh_value, nominatim_data_global, {
                             'mode': OHMode,
                             // 'warnings_severity': 7,
-                            /* Use default for now. See: https://github.com/ypid/opening_hours.js/issues/81 */
+                            /* Use default for now. See: https://github.com/opening-hours/opening_hours.js/issues/81 */
                             'locale': i18n.lng()
                         }
                             );

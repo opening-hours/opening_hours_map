@@ -13,7 +13,7 @@ A mirror is setup up under: http://ypid.de/~osm/
 Just clone the repository:
 
 ```Shell
-git clone --recursive https://github.com/ypid/opening_hours_map.git
+git clone --recursive https://github.com/opening-hours/opening_hours_map.git
 ```
 
 and install it’s dependencies (execute inside the repository):
@@ -50,7 +50,7 @@ The map uses OpenLayers to show a base map from OpenStreetMap. An additional opt
 <!-- }}} -->
 
 [ol-lib]: http://openlayers.org/
-[oh-lib]: https://github.com/ypid/opening_hours.js
+[oh-lib]: https://github.com/opening-hours/opening_hours.js
 [examples]: http://www.netzwolf.info/kartografie/openlayers/
 [OverpassAPI]: https://overpass-api.de/
 [OverpassQL]: https://wiki.openstreetmap.org/wiki/OverpassQL

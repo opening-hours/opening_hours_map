@@ -35,7 +35,7 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
     content += '<a href="https://www.openstreetmap.org/edit?editor=id&'+short_type+'='+id+'" target="_blank">iD</a>&nbsp;&nbsp;';
     content +=
         '<a href="https://www.openstreetmap.org/edit?'+short_type+'='+id+'&editor=potlatch2" target="_blank">Potlatch</a>'+
-        '&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('http://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18n.t('texts.load all with JOSM') + '</a>'+
+        '&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('https://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18n.t('texts.load all with JOSM') + '</a>'+
         '&nbsp;&nbsp;<a href="javascript:josm(\'load_object?objects=' + short_type + id + '&select=' + short_type + id + '\')">JOSM</a>'+
         '&nbsp;&nbsp;<a href="https://www.openstreetmap.org/'+type+'/'+id+'" target="_blank">Details</a>'
         + '&nbsp;&nbsp;<a href="' + evaluation_tool_url + '?EXP='
@@ -312,7 +312,7 @@ document.onLoadFunctions.push ( function () {
             }
 
             var xml = this.overpassQL(this.keyValues);
-            var url = 'http://overpass-api.de/api/interpreter?&data=' + encodeURIComponent(xml);
+            var url = 'https://overpass-api.de/api/interpreter?&data=' + encodeURIComponent(xml);
 
             var self = this;
             var xhr = new XMLHttpRequest();

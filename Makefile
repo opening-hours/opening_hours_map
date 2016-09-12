@@ -37,4 +37,4 @@ deploy-on-openingh.openstreetmap.de: opening_hours+deps.min.js
 
 .PHONY: deploy-on-openingh.openstreetmap.de
 deploy-on-ypid.de: opening_hours+deps.min.js
-	rsync  --archive * osm_admin@s17921260.onlinehome-server.info:/srv/www/osm/userdir/public -v
+	rsync  --archive * osm@www.pubsrv.ypid.de:/srv/www/osm/sites/openingh.ypid.de/public -v

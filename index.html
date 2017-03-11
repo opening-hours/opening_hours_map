@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head><!-- {{{ -->
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -20,6 +21,11 @@
         <script type="text/javascript" src="opening_hours.js/js/opening_hours_table.js"></script>
         <link rel="stylesheet" href="opening_hours.js/css/table.css"/>
         <link rel="stylesheet" href="css/default.css"/>
+        <script type="text/javascript">
+            if (document.title !== i18n.t('texts.heading map')) {
+                document.title = i18n.t('texts.heading map');
+            }
+        </script>
     </head> <!-- }}} -->
     <body><!-- {{{ -->
         <noscript>You don‘t have JavaScript enabled and that is a good thing but this tool makes heavy use of JavaScript so you need to enable it in order to use this tool. If you don’t trust the code that is going to be executed that is good as well. I encourage you to read all the source code on <a href="https://github.com/opening-hours/opening_hours.js">Github</a>. Also note that every commit and all releases are GPG signed. You might want to check this out as well :) Stay safe.</noscript>
@@ -28,7 +34,6 @@
 
         <script type="text/javascript">
             document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');
-            document.title = i18n.t('texts.heading map');
             document.write(getUserSelectTranslateHTMLCode());
 
             function submitenter(myfield,e) {

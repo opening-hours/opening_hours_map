@@ -6,13 +6,6 @@ var map;
 
 var nominatim_data_global = {};
 
-var opening_hours = require('opening_hours');
-/* Does not accept language change in Browser. Probably not the
- * correct version as it was bundled for NodeJS.
- */
-// var moment = require('moment');
-var i18n = require('i18next-client');
-
 if (!document.onLoadFunctions) {
     document.onLoadFunctions = new Array();
     window.onload = function () { for (var i=0; document.onLoadFunctions.length>i;i++) document.onLoadFunctions[i](); }

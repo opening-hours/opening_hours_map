@@ -22,7 +22,8 @@ taginfo.json: ./opening_hours.js/gen_taginfo_json.js ./opening_hours.js/related_
 
 .PHONY: dependencies-get
 dependencies-get: js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js
-	git submodule update --init --recursive
+	git submodule update --init
+	cd opening_hours.js/ && git verify-commit HEAD && git submodule update --init --recursive
 
 js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js:
 	-wget --no-clobber -O js/OpenLayers-$(OpenLayersVersion).tar.gz https://github.com/openlayers/openlayers/releases/download/release-$(OpenLayersVersion)/OpenLayers-$(OpenLayersVersion).tar.gz

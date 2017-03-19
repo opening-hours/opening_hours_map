@@ -23,7 +23,7 @@ The following Webserver configuration is currently deployed:
        name: [ 'openingh.ypid.de', 'openingh.openstreetmap.de' ]
        owner: 'osm'
        csp: True
-       csp_policy: "default-src 'none'; script-src 'self' 'unsafe-inline'; connect-src https://overpass-api.de https://nominatim.openstreetmap.org https://localhost:8111; img-src 'self' data: https://*.tile.openstreetmap.org https://*.tile.opencyclemap.org; style-src 'self' 'unsafe-inline'"
+       csp_policy: "default-src 'none'; script-src 'self' 'unsafe-inline' https://code.jquery.com; connect-src https://overpass-api.de https://nominatim.openstreetmap.org https://localhost:8111; img-src 'self' data: https://*.tile.openstreetmap.org https://*.tile.opencyclemap.org; style-src 'self' 'unsafe-inline'"
        location_list:
          - pattern: '/stats'
            options: 'return 307 http://openingh.openstreetmap.de$request_uri;'

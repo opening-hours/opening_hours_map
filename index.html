@@ -1,25 +1,31 @@
 <html>
     <head><!-- {{{ -->
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <meta name="referrer" content="no-referrer">
+        <meta name="referrer" content="no-referrer" />
         <title>Map with layer for the tag opening_hours based on OpenStreetMap</title>
-        <link rel="icon" type="image/png" href="img/favicon.png">
+        <link rel="icon" type="image/png" href="img/favicon.png" />
         <meta name="description" content="Auswertung des Tags opening_hours auf einer Karte von OpenStreetMap" />
         <script type="text/javascript" src="js/OpenLayers-2.13.1/OpenLayers.js"></script>
         <script type="text/javascript" src="js/OpenStreetMap.js"></script>
         <script type="text/javascript" src="js/popupmarker.js"></script>
         <script type="text/javascript" src="js/loadstatus.js"></script>
         <script type="text/javascript" src="js/zoomstatus.js"></script>
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB" crossorigin="anonymous"></script>
         <script type="text/javascript" src="opening_hours.js/opening_hours+deps.min.js"></script>
-        <script type="text/javascript" src="opening_hours.js/bower_components/jquery/dist/jquery.min.js"></script>
-        <script type="text/javascript" src="opening_hours.js/js/countryToLanguageMapping.js"></script>
-        <script type="text/javascript" src="opening_hours.js/js/helpers.js"></script>
-        <script type="text/javascript" src="js/main.js"></script>
+        <script type="text/javascript" src="opening_hours.js/node_modules/i18next-client/i18next.min.js"></script>
         <script type="text/javascript" src="opening_hours.js/node_modules/moment/min/moment-with-locales.min.js"></script>
         <script type="text/javascript" src="opening_hours.js/js/i18n-resources.js"></script>
         <script type="text/javascript" src="opening_hours.js/js/opening_hours_table.js"></script>
+        <script type="text/javascript" src="opening_hours.js/js/helpers.js"></script>
+        <script type="text/javascript" src="opening_hours.js/js/countryToLanguageMapping.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
         <link rel="stylesheet" href="opening_hours.js/css/table.css"/>
         <link rel="stylesheet" href="css/default.css"/>
+        <script type="text/javascript">
+            if (document.title !== i18n.t('texts.heading map')) {
+                document.title = i18n.t('texts.heading map');
+            }
+        </script>
     </head> <!-- }}} -->
     <body><!-- {{{ -->
         <noscript>You don‘t have JavaScript enabled and that is a good thing but this tool makes heavy use of JavaScript so you need to enable it in order to use this tool. If you don’t trust the code that is going to be executed that is good as well. I encourage you to read all the source code on <a href="https://github.com/opening-hours/opening_hours.js">Github</a>. Also note that every commit and all releases are GPG signed. You might want to check this out as well :) Stay safe.</noscript>
@@ -28,7 +34,6 @@
 
         <script type="text/javascript">
             document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');
-            document.title = i18n.t('texts.heading map');
             document.write(getUserSelectTranslateHTMLCode());
 
             function submitenter(myfield,e) {
@@ -57,9 +62,8 @@
             <script type="text/javascript">
                 document.write('<strong>' + i18n.t('texts.config POIs') + '</strong>:');
             </script>
-            <select id="tag_selector_input" name="tag_selector_input">
-            </select>
-            <form id="userKey" action="">
+            <select id="tag_selector_input" name="tag_selector_input"></select>
+            <form id="userKey" action="#">
             <input id="key" style="width:20%" name="key" onKeyPress="return submitenter(this,event)" />
             </form>
             <script type="text/javascript">
@@ -70,6 +74,7 @@
             </script>
         </div>
 
+        <p>
         <script type="text/javascript">
             document.write(i18n.t('texts.map is showing', { wikiUrl: wiki_url }));
             document.write('<ul>');

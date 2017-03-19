@@ -54,15 +54,15 @@ function createMap() {
     var permalinkObject;
 
     window.useUserKey = function (key) {
-        console.log(key);
-        console.log(related_tags);
-        if (related_tags.indexOf(key) !== -1) { /* Add the new key to related_tags. */
+        if (related_tags.indexOf(key) === -1) { /* Add the new key to related_tags. */
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.innerHTML = key;
             var select = document.getElementById('tag_selector_input');
+            select.appendChild(opt);
             related_tags.push(key);
-            select.options[select.options.length] = new Option(key, select.options.length);
-        } else {
-            document.getElementById('tag_selector_input').selectedIndex = related_tags.indexOf(key);
         }
+        document.getElementById('tag_selector_input').selectedIndex = related_tags.indexOf(key);
     };
 
     window.keyChanged = function() {

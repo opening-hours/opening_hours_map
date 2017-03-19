@@ -2,19 +2,28 @@ var repo_url = 'https://github.com/opening-hours/opening_hours_map';
 var html_url = 'http://openingh.openstreetmap.de/';
 var wiki_url = 'https://wiki.openstreetmap.org/wiki/Key:opening_hours';
 var evaluation_tool_url = 'evaluation_tool/';
-var map;
 
-var nominatim_data_global = {};
+/* Source ../opening_hours.js/related_tags.txt */
+var related_tags = [
+    'opening_hours',
+    'opening_hours:kitchen',
+    'opening_hours:warm_kitchen',
+    'happy_hours',
+    'delivery_hours',
+    'opening_hours:delivery',
+    'lit',
+    'smoking_hours',
+    'collection_times',
+    'service_times',
+    //
+    // 'fee',
+];
 
 if (!document.onLoadFunctions) {
     document.onLoadFunctions = new Array();
     window.onload = function () { for (var i=0; document.onLoadFunctions.length>i;i++) document.onLoadFunctions[i](); }
 }
 
-var poi_layer;
-
-var permalinkParams = {};
-var permalinkObject;
 
 function Evaluate(number, reset, value) {
     window.open(evaluation_tool_url + '?EXP='+encodeURIComponent(value), '_blank');
@@ -36,27 +45,17 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
     return content;
 }
 
-var tmp = 0;
-/* Source ../opening_hours.js/related_tags.txt */
-var related_tags = [
-    'opening_hours',
-    'opening_hours:kitchen',
-    'opening_hours:warm_kitchen',
-    'happy_hours',
-    'delivery_hours',
-    'opening_hours:delivery',
-    'lit',
-    'smoking_hours',
-    'collection_times',
-    'service_times',
-    //
-    // 'fee',
-];
+function createMap() {
 
-document.onLoadFunctions.push ( function () {
+    var map;
+    var poi_layer;
+    var nominatim_data_global = {};
+    var permalinkParams = {};
+    var permalinkObject;
 
     window.useUserKey = function (key) {
         console.log(key);
+        console.log(related_tags);
         if (related_tags.indexOf(key) !== -1) { /* Add the new key to related_tags. */
             var select = document.getElementById('tag_selector_input');
             related_tags.push(key);
@@ -514,22 +513,25 @@ document.onLoadFunctions.push ( function () {
                     return true;
             }
         },
+    }));
+    /* }}} */
+
+    //----------------------------------------------------------------------------
+    //    Stelle bestimmten Bereich in maximaler Groesse dar
+    //----------------------------------------------------------------------------
+
+    if (!map.getCenter()) {
+        map.zoomToExtent(
+            new OpenLayers.Bounds(7.1042, 50.7362, 7.1171, 50.7417).
+                transform(new OpenLayers.Projection('EPSG:4326'), map.getProjectionObject())
+        );
     }
-));
-/* }}} */
+    /* }}} */
 
-//----------------------------------------------------------------------------
-//    Stelle bestimmten Bereich in maximaler Groesse dar
-//----------------------------------------------------------------------------
-
-if (!map.getCenter()) {
-    map.zoomToExtent(
-        new OpenLayers.Bounds(7.1042, 50.7362, 7.1171, 50.7417).
-            transform(new OpenLayers.Projection('EPSG:4326'), map.getProjectionObject())
-    );
+    document.getElementById('tag_selector_input').onchange = keyChanged;
 }
-/* }}} */
 
-document.getElementById('tag_selector_input').onchange = keyChanged;
 
+$(document).ready(function () {
+    createMap();
 });

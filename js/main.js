@@ -195,12 +195,6 @@ function createMap() {
 
                 data._it_object.setDate(this.reftime);
                 text += OpeningHoursTable.drawTableAndComments(data._oh_object, data._it_object, encodeURIComponent(data._oh_value));
-
-                // if (!data._time.value && data._time.times.length>=1)
-                // text+='<div class="o">will open @ '+data._time.times[0].t.toLocaleString()+
-                //     (data._time.times[0].c? ' ('+data._time.times[0].c+')' : '') + '</div>';
-
-                // if (data._time.warnings) text+='<div class="m">'+data._time.warnings.join('<br/>')+'</div>';
             }
 
             var rows=[];

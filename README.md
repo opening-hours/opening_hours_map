@@ -1,5 +1,7 @@
 # opening_hours_map
 
+[![Build Status](https://travis-ci.org/opening-hours/opening_hours_map.svg?branch=master)](https://travis-ci.org/opening-hours/opening_hours_map)
+
 [opening_hours](https://wiki.openstreetmap.org/wiki/Key:opening_hours) tag is used in [OpenStreetMap](https://openstreetmap.org) project to describe time ranges when a specific facility (for example, a cafe) is open.
 
 This map shows the opening_hours as nicely readable time table.

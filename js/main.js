@@ -206,7 +206,7 @@ function createMap() {
                     continue;
                 }
                 val=this.html(data[tag]);
-                if (val.substr(0,7)=='http://') {
+                if (/^https?:\/\//.test(val)) {
                     var res = [];
                     var list=data[tag].split (';');
                     for (var i=0; i<list.length;i++) {

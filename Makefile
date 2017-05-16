@@ -29,8 +29,8 @@ taginfo.json: ./opening_hours.js/gen_taginfo_json.js ./opening_hours.js/related_
 
 .PHONY: dependencies-get
 dependencies-get: js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js
-	git submodule update --init
-	cd opening_hours.js/ && git verify-commit HEAD && git submodule update --init --recursive
+	git verify-commit HEAD || (echo "The author is signing all recent git commits. If the command failed because you don’t have ypid’s key in your keyring, you can import it from a keyserver and verify it’s authenticity." && exit 1)
+	git submodule update --init --recursive
 
 js/OpenLayers-$(OpenLayersVersion)/OpenLayers.js:
 	-wget --no-clobber -O js/OpenLayers-$(OpenLayersVersion).tar.gz https://github.com/openlayers/ol2/releases/download/release-$(OpenLayersVersion)/OpenLayers-$(OpenLayersVersion).tar.gz || rm -f js/OpenLayers-$(OpenLayersVersion).tar.gz

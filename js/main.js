@@ -337,6 +337,7 @@ function createMap() {
                 var key = keyvalues[i];
                 components.push("node['" + key + "'];");
                 components.push("way['" + key + "'];");
+                components.push("relation['" + key + "'];");
             }
 
             var OverpassQL = '[out:json][timeout:3]' + bboxQuery + ';(' + components.join('') + ');out body center 1000;';
@@ -435,7 +436,7 @@ function createMap() {
                     data._id = element.id;
                 }
                 data._type = element.type;
-                if (data._type == 'way') {
+                if (data._type == 'way' || data._type == 'relation') {
                     data.lat = element.center.lat;
                     data.lon = element.center.lon;
                 } else {

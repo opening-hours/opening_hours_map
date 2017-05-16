@@ -21,6 +21,9 @@ git clone --recursive https://github.com/opening-hours/opening_hours_map.git
 and install it’s dependencies (execute inside the repository):
 
 ```Shell
+sudo apt-get install jq
+npm install bower -g
+npm install uglify-js -g
 make dependencies-get
 ```
 

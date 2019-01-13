@@ -6,7 +6,7 @@
 		"description": "opening_hours map",
 		"project_url": "http://openingh.openstreetmap.de/",
 		"doc_url": "https://github.com/opening-hours/opening_hours_map",
-		"icon_url": "http://openingh.openstreetmap.de/favicon.png",
+		"icon_url": "http://openingh.openstreetmap.de/img/favicon.png",
 		"contact_name": "Robin Schneider",
 		"contact_email": "ypid@riseup.net"
 	},

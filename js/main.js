@@ -37,11 +37,11 @@ function editPopupContent(content, lat, lon, type, id, oh_value) {
     content += '<a href="https://www.openstreetmap.org/edit?editor=id&'+short_type+'='+id+'" target="_blank">iD</a>&nbsp;&nbsp;';
     content +=
         '<a href="https://www.openstreetmap.org/edit?'+short_type+'='+id+'&editor=potlatch2" target="_blank">Potlatch</a>'+
-        '&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('https://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18n.t('texts.load all with JOSM') + '</a>'+
+        '&nbsp;&nbsp;<a href="javascript:josm(\'import?url=' + encodeURIComponent('https://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18next.t('texts.load all with JOSM') + '</a>'+
         '&nbsp;&nbsp;<a href="javascript:josm(\'load_object?objects=' + short_type + id + '&select=' + short_type + id + '\')">JOSM</a>'+
         '&nbsp;&nbsp;<a href="https://www.openstreetmap.org/'+type+'/'+id+'" target="_blank">Details</a>'
         + '&nbsp;&nbsp;<a href="' + evaluation_tool_url + '?EXP='
-        + encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">' + i18n.t('texts.evaluation tool') + '</a>';
+        + encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">' + i18next.t('texts.evaluation tool') + '</a>';
     return content;
 }
 
@@ -134,7 +134,7 @@ function createMap() {
     map.addControl(new OpenLayers.Control.PanZoomBar());
     map.addControl(new OpenLayers.Control.Permalink());
     map.addControl(new OpenLayers.Control.ZoomStatus({
-        html: i18n.t('texts.low zoom level'),
+        html: i18next.t('texts.low zoom level'),
     }));
     map.addControl(new OpenLayers.Control.LoadStatus({
         html: '<img src="img/ajax-loader.gif" /><br />${layers}'
@@ -185,7 +185,7 @@ function createMap() {
                 var prettified = data._oh_object.prettifyValue();
 
                 if (data._oh_value != prettified)
-                    text += '<br/>' + i18n.t('texts.prettified value', {
+                    text += '<br/>' + i18next.t('texts.prettified value', {
                             copyFunc: 'javascript:Evaluate(null, null, \'' + data._oh_value + '\')',
                         }) + ': <div class="v">'+prettified+'</div>';
 
@@ -241,11 +241,11 @@ function createMap() {
             }
             if (nItems>limit) {
                 if (limit!=1) {
-                    items.unshift(i18n.t('texts.the first entries', { number: items.length, total: nItems } ) );
+                    items.unshift(i18next.t('texts.the first entries', { number: items.length, total: nItems } ) );
                 }
             } else if (items.length) {
                 if (limit!=1) {
-                    items.unshift(i18n.t('texts.all n entries', { total: nItems } ) );
+                    items.unshift(i18next.t('texts.all n entries', { total: nItems } ) );
                 }
             } else {
                 items=clusters;
@@ -363,12 +363,11 @@ function createMap() {
                 var crashed = true;
                 try {
                     var oh = new opening_hours(data._oh_value, nominatim_data_global, {
-                            'mode': OHMode,
-                            // 'warnings_severity': 7,
-                            /* Use default for now. See: https://github.com/opening-hours/opening_hours.js/issues/81 */
-                            'locale': i18n.lng()
-                        }
-                            );
+                        'mode': OHMode,
+                        // 'warnings_severity': 7,
+                        /* Use default for now. See: https://github.com/opening-hours/opening_hours.js/issues/81 */
+                        'locale': i18next.language,
+                    });
                     var it = oh.getIterator(this.reftime);
                     crashed = false;
                 } catch (err) {
@@ -402,7 +401,7 @@ function createMap() {
         updateNominatimData: function (query) {
             reverseGeocodeLocation(
                 query,
-                mapCountryToLanguage(i18n.lng()),
+                mapCountryToLanguage(i18next.language),
                 function(nominatim_data) {
                     // console.log(JSON.stringify(nominatim_data, null, '\t'));
                     /* http://stackoverflow.com/a/1144249 */

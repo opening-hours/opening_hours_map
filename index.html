@@ -3,7 +3,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="referrer" content="no-referrer" />
         <title>Map with layer for the tag opening_hours based on OpenStreetMap</title>
-        <link rel="icon" type="image/png" href="img/favicon.png" />
+        <link rel="icon" type="image/png" href="opening_hours.js/site/img/favicon.png" />
         <meta name="description" content="Auswertung des Tags opening_hours auf einer Karte von OpenStreetMap" />
         <script type="text/javascript" src="js/OpenLayers-2.13.1/OpenLayers.js"></script>
         <script type="text/javascript" src="js/OpenStreetMap.js"></script>
@@ -11,19 +11,19 @@
         <script type="text/javascript" src="js/loadstatus.js"></script>
         <script type="text/javascript" src="js/zoomstatus.js"></script>
         <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB" crossorigin="anonymous"></script>
-        <script type="text/javascript" src="opening_hours.js/opening_hours+deps.min.js"></script>
-        <script type="text/javascript" src="opening_hours.js/node_modules/i18next-client/i18next.min.js"></script>
-        <script type="text/javascript" src="opening_hours.js/node_modules/moment/min/moment-with-locales.min.js"></script>
-        <script type="text/javascript" src="opening_hours.js/js/i18n-resources.js"></script>
-        <script type="text/javascript" src="opening_hours.js/js/opening_hours_table.js"></script>
-        <script type="text/javascript" src="opening_hours.js/js/helpers.js"></script>
-        <script type="text/javascript" src="opening_hours.js/js/countryToLanguageMapping.js"></script>
+        <script type="text/javascript" src="opening_hours.js/build/opening_hours+deps.min.js"></script>
+        <script type="text/javascript" src="opening_hours.js/node_modules/i18next/i18next.min.js"></script>
+        <script src="opening_hours.js/node_modules/i18next-browser-languagedetector/i18nextBrowserLanguageDetector.min.js"></script>
+        <script type="text/javascript" src="opening_hours.js/site/js/i18n-resources.js"></script>
+        <script type="text/javascript" src="opening_hours.js/site/js/opening_hours_table.js"></script>
+        <script type="text/javascript" src="opening_hours.js/site/js/helpers.js"></script>
+        <script type="text/javascript" src="opening_hours.js/site/js/countryToLanguageMapping.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
-        <link rel="stylesheet" href="opening_hours.js/css/table.css"/>
+        <link rel="stylesheet" href="opening_hours.js/site/css/table.css"/>
         <link rel="stylesheet" href="css/default.css"/>
         <script type="text/javascript">
-            if (document.title !== i18n.t('texts.heading map')) {
-                document.title = i18n.t('texts.heading map');
+            if (document.title !== i18next.t('texts.heading map')) {
+                document.title = i18next.t('texts.heading map');
             }
         </script>
     </head> <!-- }}} -->
@@ -33,7 +33,7 @@
         <div id="map"></div>
 
         <script type="text/javascript">
-            document.write('<h1>' + i18n.t('texts.heading map') + '</h1>');
+            document.write('<h1>' + i18next.t('texts.heading map') + '</h1>');
             document.write(getUserSelectTranslateHTMLCode());
 
             function submitenter(myfield,e) {
@@ -60,7 +60,7 @@
 
         <div id="tag_selector">
             <script type="text/javascript">
-                document.write('<strong>' + i18n.t('texts.config POIs') + '</strong>:');
+                document.write('<strong>' + i18next.t('texts.config POIs') + '</strong>:');
             </script>
             <select id="tag_selector_input" name="tag_selector_input"></select>
             <form id="userKey" action="#">
@@ -76,20 +76,20 @@
 
         <p>
         <script type="text/javascript">
-            document.write(i18n.t('texts.map is showing', { wikiUrl: wiki_url }));
+            document.write(i18next.t('texts.map is showing', { wikiUrl: wiki_url }));
             document.write('<ul>');
-            document.write('<li>' + i18n.t('words.green')  + ': ' + i18n.t('texts.open now') + '</li>');
-            document.write('<li>' + i18n.t('words.yellow') + ': ' + i18n.t('texts.unknown now') + '</li>');
-            document.write('<li>' + i18n.t('words.red')    + ': ' + i18n.t('texts.closed now') + '</li>');
-            document.write('<li>' + i18n.t('words.violet')    + ': ' + i18n.t('texts.error') + '</li>');
+            document.write('<li>' + i18next.t('words.green')  + ': ' + i18next.t('texts.open now') + '</li>');
+            document.write('<li>' + i18next.t('words.yellow') + ': ' + i18next.t('texts.unknown now') + '</li>');
+            document.write('<li>' + i18next.t('words.red')    + ': ' + i18next.t('texts.closed now') + '</li>');
+            document.write('<li>' + i18next.t('words.violet')    + ': ' + i18next.t('texts.error') + '</li>');
             document.write('</ul>');
-            document.write(i18n.t('texts.warning', { sign: '<q>W</q>' }));
+            document.write(i18next.t('texts.warning', { sign: '<q>W</q>' }));
         </script>
         </p>
 
         <div id="filter_selector"><p>
         <script type="text/javascript">
-            document.write(i18n.t('texts.map filter'));
+            document.write(i18next.t('texts.map filter'));
             document.write('<form name="filter_form">');
             var showFilterOptions = ['none', 'error', 'warnOnly', 'errorOnly', 'open', 'unknown', 'closed', 'openOrUnknown'];
             for (var i = 0; i < showFilterOptions.length; i++) {
@@ -97,7 +97,7 @@
                 document.write('<label><input type="radio" name="filter"'
                         + ' value="' + filter_id + '"'
                         + ' id="filter_form_' + filter_id + '"'
-                        + ' onclick="applyNewFilter(this)">' + i18n.t('texts.filter.' + filter_id) + '</input></label><br>');
+                        + ' onclick="applyNewFilter(this)">' + i18next.t('texts.filter.' + filter_id) + '</input></label><br>');
             }
             document.write('</form>');
             document.getElementById('filter_form_none').checked = true;
@@ -106,12 +106,12 @@
 
         <script type="text/javascript">
             document.write('</p><p>');
-            document.write(i18n.t('texts.data source', {
+            document.write(i18next.t('texts.data source', {
                 APIaTag:      '<a href="https://overpass-api.de/">Overpass API</a>',
                 OSMaTag:      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
                 OSMStartaTag: '<a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
                 }) + '<br />');
-            document.write(i18n.t('texts.this website', { url: repo_url, hoster: 'GitHub' }));
+            document.write(i18next.t('texts.this website', { url: repo_url, hoster: 'GitHub' }));
             document.write('</p>');
         </script>
 

@@ -22,7 +22,7 @@ ready-for-hosting: dependencies-get
 
 .PHONY: opening_hours+deps.min.js
 opening_hours+deps.min.js:
-	$(MAKE) --directory opening_hours.js/ opening_hours+deps.min.js
+	$(MAKE) --directory opening_hours.js/ build/opening_hours+deps.min.js
 
 taginfo.json: ./opening_hours.js/gen_taginfo_json.js ./opening_hours.js/related_tags.txt taginfo_template.json
 	opening_hours_map --key-file ./opening_hours.js/related_tags.txt --template-file taginfo_template.json > "$@"

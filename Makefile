@@ -49,4 +49,4 @@ deploy-on-ypid.de: opening_hours+deps.min.js
 	rm -rf "/tmp/opening_hours_map"
 	mkdir --parents "/tmp/opening_hours_map"
 	/bin/tar --exclude-vcs --exclude='./js/*.tar.gz' --exclude='./js/OpenLayers-$(OpenLayersVersion)/doc' --exclude='./opening_hours.js/node_modules/bower' --exclude='./opening_hours.js/submodules/panieravide.github.io/id-indoor' --exclude='./opening_hours.js/submodules/panieravide.github.io/pic4carto' --no-acls -czf - . | /bin/tar -xz --directory "/tmp/opening_hours_map" -f -
-	qvm-copy-to-vm s-cm "/tmp/opening_hours_map"
+	qvm-copy "/tmp/opening_hours_map"

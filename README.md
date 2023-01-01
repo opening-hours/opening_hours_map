@@ -25,6 +25,7 @@ sudo apt-get install jq
 npm install bower -g
 npm install uglify-js -g
 make dependencies-get
+cd opening_hours.js && npm i && cd ..
 ```
 
 ## How does it work?

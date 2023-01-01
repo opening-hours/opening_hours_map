@@ -1723,9 +1723,6 @@ OpenLayers.Layer.PopupMarker = OpenLayers.Class(OpenLayers.Layer.Markers,{
         result.push('<a target="_blank" href="http://www.openstreetmap.org/edit?editor=id&'+
             'lat='+data.lat+'&amp;lon='+data.lon+'&amp;zoom=17">iD</a> or');
 
-        result.push('<a target="_blank" href="http://www.openstreetmap.org/edit?editor=potlatch2&'+
-            'lat='+data.lat+'&amp;lon='+data.lon+'&amp;zoom=17">potlatch2</a>.');
-
         return result.join(' ');
     },
 

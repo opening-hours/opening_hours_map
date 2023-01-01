@@ -31,13 +31,12 @@ function Evaluate(number, reset, value) {
 
 // From https://github.com/rurseekatze/OpenLinkMap/blob/master/js/small.js
 function editPopupContent(content, lat, lon, type, id, oh_value) {
-    var short_type = type.substr(0, 1);
     // add some links to the bottom of a popup
     content += '<br />';
     content += '<a href="https://www.openstreetmap.org/edit?editor=id&'+type+'='+id+'" target="_blank">iD</a>&nbsp;&nbsp;';
     content +=
         '<a href="javascript:josm(\'import?url=' + encodeURIComponent('https://overpass-api.de/api/xapi_meta?*[opening_hours=' + oh_value + ']') + '\')">' + i18next.t('texts.load all with JOSM') + '</a>'+
-        '&nbsp;&nbsp;<a href="javascript:josm(\'load_object?objects=' + short_type + id + '&select=' + short_type + id + '\')">JOSM</a>'+
+        '&nbsp;&nbsp;<a href="javascript:josm(\'load_object?objects=' + type + id + '&select=' + type + id + '\')">JOSM</a>'+
         '&nbsp;&nbsp;<a href="https://www.openstreetmap.org/'+type+'/'+id+'" target="_blank">Details</a>'
         + '&nbsp;&nbsp;<a href="' + evaluation_tool_url + '?EXP='
         + encodeURIComponent(oh_value) + '&lat=' + lat + '&lon=' + lon + '" target="_blank">' + i18next.t('texts.evaluation tool') + '</a>';

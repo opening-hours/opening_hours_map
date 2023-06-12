@@ -348,6 +348,7 @@ function createMap() {
             if (typeof data._oh_value === 'undefined' && typeof data._oh_state === 'undefined') {
                 for (var i=0; i < OSM_tags.length; i++) {
                     if (typeof data[OSM_tags[i]] === 'string') {
+                        data._oh_key = OSM_tags[i];
                         data._oh_value = data[OSM_tags[i]];
                         break;
                     }
@@ -359,6 +360,9 @@ function createMap() {
                 }
 
                 var crashed = true;
+                if (["collection_times", "service_times"].includes(data._oh_key)) {
+                    OHMode = 2;
+                }
                 try {
                     var oh = new opening_hours(data._oh_value, nominatim_data_global, {
                         'mode': OHMode,

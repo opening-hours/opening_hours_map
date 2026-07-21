@@ -118,6 +118,10 @@ npm test
 
 <!-- }}} -->
 
+## License
+
+LGPL-3.0-only - see [LICENSE](LICENSE) file for details.
+
 [ol-lib]: https://openlayers.org/
 [oh-lib]: https://github.com/opening-hours/opening_hours.js
 [examples]: http://www.netzwolf.info/kartografie/openlayers/

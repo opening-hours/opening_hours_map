@@ -21,14 +21,13 @@ git clone --recursive https://github.com/opening-hours/opening_hours_map
 and install its dependencies (execute inside the repository):
 
 ```Shell
-npm install
 make dependencies-get
 ```
 
 This will:
-- Install development dependencies (ESLint, html-validate)
-- Download OpenLayers
 - Initialize the opening_hours.js git submodule
+- Install the map dependencies, including OpenLayers and development tools
+- Install the opening_hours.js dependencies
 
 ## How does it work?
 

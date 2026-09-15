@@ -8,6 +8,14 @@
         <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
         <meta name="description" content="Interactive map showing opening_hours tags from OpenStreetMap with visual evaluation.">
         <script src="opening_hours.js/build/opening_hours+deps.min.js"></script>
+        <!-- Keeps the i18next instance shared with opening_hours.js/site/js, independent of how deep js/init-modules.js is nested. -->
+        <script type="importmap">
+            {
+                "imports": {
+                    "i18next": "./opening_hours.js/node_modules/i18next/dist/esm/i18next.js"
+                }
+            }
+        </script>
         <script type="module" src="js/init-modules.js"></script>
         <script type="module" src="build/main.bundle.js"></script>
         <link rel="stylesheet" href="opening_hours.js/site/css/table.css">

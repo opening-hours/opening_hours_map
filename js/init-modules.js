@@ -1,5 +1,5 @@
 // Initialize ES modules and make necessary functions globally available
-import i18next from '../opening_hours.js/node_modules/i18next/dist/esm/i18next.js';
+import i18next from 'i18next';
 import { resources, getUserSelectTranslateHTMLCode, changeLanguage, detectLanguage } from '../opening_hours.js/site/js/i18n-resources.js';
 import { OpeningHoursTable } from '../opening_hours.js/site/js/opening_hours_table.js';
 

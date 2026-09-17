@@ -32,6 +32,8 @@ taginfo.json: ./opening_hours.js/scripts/related_tags.txt ./opening_hours.js/scr
 dependencies-get:
 	git verify-commit HEAD || (echo "The author is signing all recent git commits. If the command failed because you don’t have ypid’s key in your keyring, you can import it from a keyserver and verify it’s authenticity." && exit 1)
 	git submodule update --init --recursive
+	npm ci
+	npm ci --prefix opening_hours.js
 
 .PHONY: deploy-on-all-servers
 deploy-on-all-servers: deploy-on-openingh.openstreetmap.de deploy-on-ypid.de

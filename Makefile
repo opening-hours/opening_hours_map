@@ -40,7 +40,7 @@ deploy-on-all-servers: deploy-on-openingh.openstreetmap.de deploy-on-ypid.de
 
 .PHONY: deploy-on-openingh.openstreetmap.de
 deploy-on-openingh.openstreetmap.de: opening_hours+deps.min.js build-main-bundle
-	rsync  --archive * everest.openstreetmap.de:~/www -v
+	rsync --archive --delete-after * everest.openstreetmap.de:~/www -v
 
 # Custom deployment method which allows me to fully isolate the development and build environment from the server.
 # Copy tar because qvm-copy blocks relative symlinks.
